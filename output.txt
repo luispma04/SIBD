@@ -1,0 +1,52 @@
+=========================================
+QUERY A: The name of all boats that are used in some trip
+=========================================
+
+         name         
+----------------------
+ Atlantic Dream
+ Cote d Azur
+ Mediterranean Star
+ Ocean Explorer
+ Sea Breeze
+(5 rows)
+
+
+=========================================
+QUERY B: The name of all boats that are not used in any trip
+=========================================
+
+      name       
+-----------------
+ Bella Vista
+ British Sailor
+ Copacabana
+ Costa Brava
+ Freedom Wave
+(5 rows)
+
+
+=========================================
+QUERY C: The name of all boats registered in 'PRT' (ISO code) 
+for which at least one responsible for a reservation has a 
+surname that ends with 'Santos'
+=========================================
+
+      name       
+-----------------
+ Atlantic Dream
+ Ocean Explorer
+ Sea Breeze
+(3 rows)
+
+
+=========================================
+QUERY D: The full name of all skippers without any certificate 
+corresponding to the class of the trip's boat
+=========================================
+
+    full_name    
+-----------------
+ Ana Costa
+ Beatriz Santos
+(2 rows)
