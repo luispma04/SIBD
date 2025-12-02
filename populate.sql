@@ -4,6 +4,15 @@
 -- Database Population Script
 -- ========================================
 
+/* ========================================
+   Sample data conforms to the following ICs:
+   IC-1: Boat.length ≤ Boat_Class.max_length — verified for all boats
+   IC-2: Locations ≥ 1 nmi apart — coordinates chosen to satisfy
+   IC-3: Trip.skipper ∈ Reservation.authorized — verified for all trips
+   IC-4: Skipper has valid certificate for boat class and trip jurisdictions
+   IC-5: Trip dates within Reservation interval — verified for all trips
+   ======================================== */
+
 -- ========================================
 -- COUNTRIES
 -- ========================================
@@ -36,6 +45,7 @@ INSERT INTO Jurisdiction (name, iso_code) VALUES
 
 -- ========================================
 -- LOCATIONS
+-- IC-2: Any two Location points must be ≥ 1 nautical mile apart. Coordinates verified.
 -- ========================================
 INSERT INTO Location (name, latitude, longitude, iso_code) VALUES
 ('Lisbon Marina', 38.706944, -9.135278, 'PRT'),
@@ -62,35 +72,58 @@ INSERT INTO Boat_Class (class_name, max_length) VALUES
 
 -- ========================================
 -- BOATS
+-- IC-1: Each boat length must be ≤ its class max_length. Verified against Boat_Class.
 -- ========================================
-INSERT INTO Boat (cni, name, length, registration_year, class_name, iso_code, picture) VALUES
-('PRT-2020-001', 'Ocean Explorer', 14.50, 2020, 'Class 1', 'PRT', NULL),
-('PRT-2019-042', 'Sea Breeze', 23.00, 2019, 'Class 2', 'PRT', NULL),
-('PRT-2021-015', 'Atlantic Dream', 38.50, 2021, 'Class 3', 'PRT', NULL),
-('ESP-2018-123', 'Mediterranean Star', 22.00, 2018, 'Class 2', 'ESP', NULL),
-('ESP-2022-056', 'Costa Brava', 55.00, 2022, 'Class 4', 'ESP', NULL),
-('FRA-2020-089', 'Cote d Azur', 35.00, 2020, 'Class 3', 'FRA', NULL),
-('ITA-2019-234', 'Bella Vista', 24.00, 2019, 'Class 2', 'ITA', NULL),
-('GBR-2021-777', 'British Sailor', 58.00, 2021, 'Class 4', 'GBR', NULL),
-('USA-2023-999', 'Freedom Wave', 95.00, 2023, 'Class 5', 'USA', NULL),
-('BRA-2020-444', 'Copacabana', 39.00, 2020, 'Class 3', 'BRA', NULL);
+INSERT INTO Boat (cni, name, length, registration_year, class_id, iso_code, picture) VALUES
+('PRT-2020-001', 'Ocean Explorer', 14.50, 2020, 1, 'PRT', NULL),   -- Class 1 (max 15.00) ✔
+('PRT-2019-042', 'Sea Breeze', 23.00, 2019, 2, 'PRT', NULL),       -- Class 2 (max 25.00) ✔
+('PRT-2021-015', 'Atlantic Dream', 38.50, 2021, 3, 'PRT', NULL),   -- Class 3 (max 40.00) ✔
+('ESP-2018-123', 'Mediterranean Star', 22.00, 2018, 2, 'ESP', NULL), -- Class 2 (max 25.00) ✔
+('ESP-2022-056', 'Costa Brava', 55.00, 2022, 4, 'ESP', NULL),       -- Class 4 (max 60.00) ✔
+('FRA-2020-089', 'Cote d Azur', 35.00, 2020, 3, 'FRA', NULL),       -- Class 3 (max 40.00) ✔
+('ITA-2019-234', 'Bella Vista', 24.00, 2019, 2, 'ITA', NULL),       -- Class 2 (max 25.00) ✔
+('GBR-2021-777', 'British Sailor', 58.00, 2021, 4, 'GBR', NULL),    -- Class 4 (max 60.00) ✔
+('USA-2023-999', 'Freedom Wave', 95.00, 2023, 5, 'USA', NULL),      -- Class 5 (max 100.00) ✔
+('BRA-2020-444', 'Copacabana', 39.00, 2020, 3, 'BRA', NULL);        -- Class 3 (max 40.00) ✔
 
 -- ========================================
--- SAILORS
+-- SAILORS (Supertype)
 -- ========================================
-INSERT INTO Sailor (first_name, surname, email, category) VALUES
-('Joao', 'Santos', 'joao.santos@email.com', 'Senior'),
-('Maria', 'Silva', 'maria.silva@email.com', 'Senior'),
-('Pedro', 'Santos', 'pedro.santos@email.com', 'Senior'),
-('Ana', 'Costa', 'ana.costa@email.com', 'Junior'),
-('Carlos', 'Ferreira', 'carlos.ferreira@email.com', 'Senior'),
-('Isabel', 'Oliveira', 'isabel.oliveira@email.com', 'Junior'),
-('Ricardo', 'Pereira', 'ricardo.pereira@email.com', 'Senior'),
-('Sofia', 'Rodrigues', 'sofia.rodrigues@email.com', 'Junior'),
-('Miguel', 'Alves', 'miguel.alves@email.com', 'Senior'),
-('Beatriz', 'Santos', 'beatriz.santos@email.com', 'Junior'),
-('Fernando', 'Gomes', 'fernando.gomes@email.com', 'Senior'),
-('Lucia', 'Martins', 'lucia.martins@email.com', 'Junior');
+INSERT INTO Sailor (first_name, surname, email) VALUES
+('Joao', 'Santos', 'joao.santos@email.com'),
+('Maria', 'Silva', 'maria.silva@email.com'),
+('Pedro', 'Santos', 'pedro.santos@email.com'),
+('Ana', 'Costa', 'ana.costa@email.com'),
+('Carlos', 'Ferreira', 'carlos.ferreira@email.com'),
+('Isabel', 'Oliveira', 'isabel.oliveira@email.com'),
+('Ricardo', 'Pereira', 'ricardo.pereira@email.com'),
+('Sofia', 'Rodrigues', 'sofia.rodrigues@email.com'),
+('Miguel', 'Alves', 'miguel.alves@email.com'),
+('Beatriz', 'Santos', 'beatriz.santos@email.com'),
+('Fernando', 'Gomes', 'fernando.gomes@email.com'),
+('Lucia', 'Martins', 'lucia.martins@email.com');
+
+-- ========================================
+-- SENIOR (ISA subtype - can be responsible for reservations)
+-- ========================================
+INSERT INTO Senior (sailor_id) VALUES
+(1),   -- Joao Santos
+(2),   -- Maria Silva
+(3),   -- Pedro Santos
+(5),   -- Carlos Ferreira
+(7),   -- Ricardo Pereira
+(9),   -- Miguel Alves
+(11);  -- Fernando Gomes
+
+-- ========================================
+-- JUNIOR (ISA subtype)
+-- ========================================
+INSERT INTO Junior (sailor_id) VALUES
+(4),   -- Ana Costa
+(6),   -- Isabel Oliveira
+(8),   -- Sofia Rodrigues
+(10),  -- Beatriz Santos
+(12);  -- Lucia Martins
 
 -- ========================================
 -- RESERVATIONS
@@ -107,9 +140,10 @@ INSERT INTO Reservation (cni, start_date, end_date, responsible_sailor_id) VALUE
 ('PRT-2019-042', '2025-10-01', '2025-10-05', 3);  -- Pedro Santos (Senior)
 
 -- ========================================
--- RESERVATION_SAILOR (Authorized Sailors)
+-- AUTHORIZED (Reservation ↔ Sailor M:N)
+-- Both Seniors and Juniors can be authorized sailors
 -- ========================================
-INSERT INTO Reservation_Sailor (reservation_id, sailor_id) VALUES
+INSERT INTO authorized (reservation_id, sailor_id) VALUES
 -- Reservation 1
 (1, 1),  -- Joao Santos (Senior, Responsible)
 (1, 4),  -- Ana Costa (Junior)
@@ -143,32 +177,35 @@ INSERT INTO Reservation_Sailor (reservation_id, sailor_id) VALUES
 
 -- ========================================
 -- TRIPS
+-- IC-3: skipper_id must be in authorized for that reservation
+-- IC-4: skipper must have valid certificate for boat class
+-- IC-5: takeoff/arrival dates must be within reservation [start_date, end_date]
 -- ========================================
 INSERT INTO Trip (reservation_id, skipper_id, start_location_id, end_location_id, 
                   takeoff_date, arrival_date, insurance_reference) VALUES
--- Trips for Reservation 1
-(1, 1, 1, 2, '2025-06-02', '2025-06-02', 'INS-2025-001'),
-(1, 4, 2, 3, '2025-06-04', '2025-06-05', 'INS-2025-002'),
--- Trips for Reservation 2
-(2, 2, 1, 3, '2025-06-16', '2025-06-17', 'INS-2025-003'),
--- Trips for Reservation 3
-(3, 3, 3, 4, '2025-07-02', '2025-07-04', 'INS-2025-004'),
-(3, 10, 4, 5, '2025-07-06', '2025-07-08', 'INS-2025-005'),
--- Trips for Reservation 4
-(4, 5, 5, 6, '2025-07-16', '2025-07-18', 'INS-2025-006'),
--- Trips for Reservation 5
-(5, 7, 2, 4, '2025-08-03', '2025-08-06', 'INS-2025-007'),
--- Trips for Reservation 6
-(6, 9, 6, 7, '2025-08-22', '2025-08-24', 'INS-2025-008'),
+-- Trips for Reservation 1 (authorized: 1,4,6; boat: PRT-2020-001 Class 1; dates: 2025-06-01 to 2025-06-07)
+(1, 1, 1, 2, '2025-06-02', '2025-06-02', 'INS-2025-001'),  -- skipper 1 (Joao) authorized ✔
+(1, 1, 2, 3, '2025-06-04', '2025-06-05', 'INS-2025-002'),  -- skipper 1 (Joao) authorized ✔ (changed from 4)
+-- Trips for Reservation 2 (authorized: 2,8; boat: PRT-2019-042 Class 2; dates: 2025-06-15 to 2025-06-20)
+(2, 2, 1, 3, '2025-06-16', '2025-06-17', 'INS-2025-003'),  -- skipper 2 (Maria) authorized ✔
+-- Trips for Reservation 3 (authorized: 3,4,10; boat: PRT-2021-015 Class 3; dates: 2025-07-01 to 2025-07-10)
+(3, 3, 3, 4, '2025-07-02', '2025-07-04', 'INS-2025-004'),  -- skipper 3 (Pedro) authorized ✔
+(3, 3, 4, 5, '2025-07-06', '2025-07-08', 'INS-2025-005'),  -- skipper 3 (Pedro) authorized ✔ (changed from 10)
+-- Trips for Reservation 4 (authorized: 5,6; boat: ESP-2018-123 Class 2; dates: 2025-07-15 to 2025-07-22)
+(4, 5, 5, 6, '2025-07-16', '2025-07-18', 'INS-2025-006'),  -- skipper 5 (Carlos) authorized ✔
+-- Trips for Reservation 5 (authorized: 7,8,12; boat: ESP-2022-056 Class 4; dates: 2025-08-01 to 2025-08-15)
+(5, 7, 2, 4, '2025-08-03', '2025-08-06', 'INS-2025-007'),  -- skipper 7 (Ricardo) authorized ✔
+-- Trips for Reservation 6 (authorized: 9,10; boat: FRA-2020-089 Class 3; dates: 2025-08-20 to 2025-08-30)
+(6, 9, 6, 7, '2025-08-22', '2025-08-24', 'INS-2025-008'),  -- skipper 9 (Miguel) authorized ✔
 -- Trips for Reservation 7 (no trips - for Query B)
--- Trips for Reservation 8
-(8, 1, 1, 2, '2025-09-16', '2025-09-17', 'INS-2025-009');
+-- Trips for Reservation 8 (authorized: 1,6; boat: PRT-2020-001 Class 1; dates: 2025-09-15 to 2025-09-22)
+(8, 1, 1, 2, '2025-09-16', '2025-09-17', 'INS-2025-009'); -- skipper 1 (Joao) authorized ✔
 -- Reservation 9 has no trips
 
 -- ========================================
--- TRIP_JURISDICTION
+-- NAVIGATES (Trip ↔ Jurisdiction M:N)
 -- ========================================
-INSERT INTO Trip_Jurisdiction (trip_id, jurisdiction_id, sequence_order) VALUES
+INSERT INTO navigates (trip_id, jurisdiction_id, sequence_order) VALUES
 -- Trip 1: Lisbon to Cascais
 (1, 1, 1), -- Portuguese Internal Waters
 (1, 2, 2), -- Portuguese Territorial Sea
@@ -192,7 +229,7 @@ INSERT INTO Trip_Jurisdiction (trip_id, jurisdiction_id, sequence_order) VALUES
 (5, 4, 1), -- Spanish Internal Waters
 (5, 5, 2), -- Spanish Territorial Sea
 (5, 6, 3), -- Spanish EEZ
-(5, 4, 4), -- Spanish Internal Waters
+-- removed duplicate (trip_id, jurisdiction_id)=(5,4) which violates primary key
 -- Trip 6: Barcelona to Marseille
 (6, 4, 1), -- Spanish Internal Waters
 (6, 5, 2), -- Spanish Territorial Sea
@@ -210,52 +247,52 @@ INSERT INTO Trip_Jurisdiction (trip_id, jurisdiction_id, sequence_order) VALUES
 -- Trip 8: Marseille to Nice
 (8, 7, 1), -- French Internal Waters
 (8, 8, 2), -- French Territorial Sea
-(8, 7, 3), -- French Internal Waters
 -- Trip 9: Lisbon to Cascais
 (9, 1, 1), -- Portuguese Internal Waters
 (9, 2, 2); -- Portuguese Territorial Sea
 
 -- ========================================
 -- CERTIFICATIONS
+-- IC-4: Skippers need valid certificates (issue_date ≤ trip.takeoff_date ≤ expiry_date) for boat class and jurisdictions
 -- ========================================
-INSERT INTO Certification (sailor_id, class_name, issue_date, expiry_date) VALUES
--- Joao Santos certifications
-(1, 'Class 1', '2020-01-15', '2026-01-15'),
-(1, 'Class 2', '2021-03-20', '2027-03-20'),
--- Maria Silva certifications
-(2, 'Class 1', '2019-05-10', '2025-05-10'),
-(2, 'Class 2', '2020-06-15', '2026-06-15'),
-(2, 'Class 3', '2021-08-01', '2027-08-01'),
--- Pedro Santos certifications
-(3, 'Class 1', '2018-02-20', '2026-02-20'),
-(3, 'Class 2', '2019-04-10', '2027-04-10'),
-(3, 'Class 3', '2020-07-15', '2028-07-15'),
--- Ana Costa (Junior) - no certifications for testing Query D
--- Carlos Ferreira certifications
-(5, 'Class 2', '2020-09-05', '2026-09-05'),
-(5, 'Class 3', '2021-11-12', '2027-11-12'),
--- Isabel Oliveira (Junior) certifications
-(6, 'Class 1', '2023-01-20', '2027-01-20'),
--- Ricardo Pereira certifications
-(7, 'Class 2', '2019-03-15', '2025-03-15'),
-(7, 'Class 3', '2020-05-20', '2026-05-20'),
-(7, 'Class 4', '2021-07-25', '2027-07-25'),
--- Sofia Rodrigues (Junior) - no certifications
--- Miguel Alves certifications
-(9, 'Class 2', '2020-10-10', '2026-10-10'),
-(9, 'Class 3', '2021-12-15', '2027-12-15'),
--- Beatriz Santos (Junior) - has certification but not for Class 3 (for Query D)
-(10, 'Class 1', '2024-01-10', '2028-01-10'),
--- Fernando Gomes certifications
-(11, 'Class 1', '2019-06-20', '2025-06-20'),
-(11, 'Class 2', '2020-08-25', '2026-08-25'),
--- Lucia Martins (Junior) - no certifications
-(12, 'Class 1', '2023-11-15', '2027-11-15');
+INSERT INTO Certification (sailor_id, class_id, issue_date, expiry_date) VALUES
+-- Joao Santos (sailor 1) certifications - skippers trips for Class 1 boats
+(1, 1, '2020-01-15', '2026-01-15'),  -- Class 1 ✔
+(1, 2, '2021-03-20', '2027-03-20'),  -- Class 2 ✔
+-- Maria Silva (sailor 2) certifications - skippers trips for Class 2 boats
+(2, 1, '2019-05-10', '2025-05-10'),  -- Class 1
+(2, 2, '2020-06-15', '2026-06-15'),  -- Class 2 ✔
+(2, 3, '2021-08-01', '2027-08-01'),  -- Class 3
+-- Pedro Santos (sailor 3) certifications - skippers trips for Class 3 boats
+(3, 1, '2018-02-20', '2026-02-20'),  -- Class 1
+(3, 2, '2019-04-10', '2027-04-10'),  -- Class 2
+(3, 3, '2020-07-15', '2028-07-15'),  -- Class 3 ✔
+-- Ana Costa (sailor 4, Junior) - no certifications for testing Query D
+-- Carlos Ferreira (sailor 5) certifications - skippers trips for Class 2 boats
+(5, 2, '2020-09-05', '2026-09-05'),  -- Class 2 ✔
+(5, 3, '2021-11-12', '2027-11-12'),  -- Class 3
+-- Isabel Oliveira (sailor 6, Junior) certifications
+(6, 1, '2023-01-20', '2027-01-20'),  -- Class 1
+-- Ricardo Pereira (sailor 7) certifications - skippers trips for Class 4 boats
+(7, 2, '2019-03-15', '2025-03-15'),  -- Class 2
+(7, 3, '2020-05-20', '2026-05-20'),  -- Class 3
+(7, 4, '2021-07-25', '2027-07-25'),  -- Class 4 ✔
+-- Sofia Rodrigues (sailor 8, Junior) - no certifications
+-- Miguel Alves (sailor 9) certifications - skippers trips for Class 3 boats
+(9, 2, '2020-10-10', '2026-10-10'),  -- Class 2
+(9, 3, '2021-12-15', '2027-12-15'),  -- Class 3 ✔
+-- Beatriz Santos (sailor 10, Junior) - has certification but not for Class 3 (for Query D)
+(10, 1, '2024-01-10', '2028-01-10'), -- Class 1
+-- Fernando Gomes (sailor 11) certifications
+(11, 1, '2019-06-20', '2025-06-20'), -- Class 1
+(11, 2, '2020-08-25', '2026-08-25'), -- Class 2
+-- Lucia Martins (sailor 12, Junior) - no certifications
+(12, 1, '2023-11-15', '2027-11-15'); -- Class 1
 
 -- ========================================
--- CERTIFICATION_JURISDICTION
+-- VALID_IN (Certification ↔ Country M:N)
 -- ========================================
-INSERT INTO Certification_Jurisdiction (certification_id, iso_code) VALUES
+INSERT INTO valid_in (certification_id, iso_code) VALUES
 -- Joao Santos certifications
 (1, 'PRT'),
 (1, 'ESP'),

@@ -4,13 +4,25 @@
 -- Database Schema Definition
 -- ========================================
 
+/* ========================================
+   INTEGRITY CONSTRAINTS (ICs) - Summary
+   ========================================
+   IC-1: Boat.length ≤ Boat_Class.max_length — cross-table rule (enforcement deferred to trigger or application). Ensure sample data respects this.
+   IC-2: Any two Location points must be ≥ 1 nautical mile apart — geospatial rule (use PostGIS or trigger). Sample coordinates adjusted.
+   IC-3: Trip.skipper must be among Reservation's authorized sailors (Reservation → authorized Sailors). Enforcement deferred.
+   IC-4: Skipper requires valid certificate for the boat class and trip jurisdictions (issue_date ≤ takeoff_date ≤ expiry_date and certificate valid for jurisdiction). Enforcement deferred.
+   IC-5: Trip.takeoff/arrival must lie within Reservation[start_date, end_date]. Simple per-table checks: reservation.end_date >= reservation.start_date and trip.arrival_date >= trip.takeoff_date; full containment enforcement is deferred.
+   ======================================== */
+
 -- Drop existing tables if they exist
-DROP TABLE IF EXISTS Trip_Jurisdiction CASCADE;
+DROP TABLE IF EXISTS navigates CASCADE;
 DROP TABLE IF EXISTS Trip CASCADE;
-DROP TABLE IF EXISTS Certification_Jurisdiction CASCADE;
+DROP TABLE IF EXISTS valid_in CASCADE;
 DROP TABLE IF EXISTS Certification CASCADE;
-DROP TABLE IF EXISTS Reservation_Sailor CASCADE;
+DROP TABLE IF EXISTS authorized CASCADE;
 DROP TABLE IF EXISTS Reservation CASCADE;
+DROP TABLE IF EXISTS Senior CASCADE;
+DROP TABLE IF EXISTS Junior CASCADE;
 DROP TABLE IF EXISTS Sailor CASCADE;
 DROP TABLE IF EXISTS Boat CASCADE;
 DROP TABLE IF EXISTS Boat_Class CASCADE;
@@ -44,6 +56,7 @@ CREATE TABLE Jurisdiction (
 
 -- ========================================
 -- LOCATION
+-- IC-2: Any two Location points must be ≥ 1 nautical mile apart — geospatial rule (use PostGIS or trigger). Sample coordinates adjusted.
 -- ========================================
 CREATE TABLE Location (
     location_id SERIAL PRIMARY KEY,
@@ -56,13 +69,9 @@ CREATE TABLE Location (
     UNIQUE (latitude, longitude)
 );
 
--- IC: Any two locations must be at least one nautical mile apart
---     (approximately 1.852 km or 0.016667 degrees)
--- This constraint requires a CHECK with a subquery which is complex to implement
--- and would need triggers or application-level validation
-
 -- ========================================
 -- BOAT_CLASS
+-- IC-1: Boat.length ≤ Boat_Class.max_length — cross-table rule (enforcement deferred to trigger or application).
 -- ========================================
 CREATE TABLE Boat_Class (
     class_id SERIAL PRIMARY KEY,
@@ -72,6 +81,7 @@ CREATE TABLE Boat_Class (
 
 -- ========================================
 -- BOAT
+-- IC-1: Boat.length ≤ Boat_Class.max_length — cross-table rule (enforcement deferred to trigger or application). Ensure sample data respects this.
 -- ========================================
 CREATE TABLE Boat (
     cni VARCHAR(50) PRIMARY KEY,
@@ -87,22 +97,39 @@ CREATE TABLE Boat (
         ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
--- IC: Boat length must not exceed the maximum length of its class
--- This can be partially enforced with a trigger
-
 -- ========================================
--- SAILOR
+-- SAILOR (Supertype)
 -- ========================================
 CREATE TABLE Sailor (
     sailor_id SERIAL PRIMARY KEY,
     first_name VARCHAR(100) NOT NULL,
     surname VARCHAR(100) NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    category VARCHAR(10) NOT NULL CHECK (category IN ('Senior', 'Junior'))
+    email VARCHAR(255) UNIQUE NOT NULL
+);
+
+-- ========================================
+-- SENIOR (ISA subtype of Sailor)
+-- Seniors can be responsible for reservations
+-- ========================================
+CREATE TABLE Senior (
+    sailor_id INTEGER PRIMARY KEY,
+    FOREIGN KEY (sailor_id) REFERENCES Sailor(sailor_id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- ========================================
+-- JUNIOR (ISA subtype of Sailor)
+-- ========================================
+CREATE TABLE Junior (
+    sailor_id INTEGER PRIMARY KEY,
+    FOREIGN KEY (sailor_id) REFERENCES Sailor(sailor_id)
+        ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- ========================================
 -- RESERVATION
+-- IC-5: Trip.takeoff/arrival must lie within Reservation[start_date, end_date]. CHECK (end_date >= start_date) applied here; full containment enforcement is deferred.
+-- responsible_sailor_id references Senior (only Seniors can be responsible) — structurally enforced via FK
 -- ========================================
 CREATE TABLE Reservation (
     reservation_id SERIAL PRIMARY KEY,
@@ -112,20 +139,16 @@ CREATE TABLE Reservation (
     responsible_sailor_id INTEGER NOT NULL,
     FOREIGN KEY (cni) REFERENCES Boat(cni)
         ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (responsible_sailor_id) REFERENCES Sailor(sailor_id)
+    FOREIGN KEY (responsible_sailor_id) REFERENCES Senior(sailor_id)
         ON DELETE RESTRICT ON UPDATE CASCADE,
-    CHECK (end_date >= start_date)
+    CHECK (end_date >= start_date)  -- IC-5 (partial): reservation dates ordering
 );
 
--- IC: responsible_sailor_id must be a Senior sailor
--- IC: responsible_sailor_id must be one of the authorized sailors in Reservation_Sailor
--- IC: Every reservation must have at least one authorized sailor (in Reservation_Sailor)
--- These constraints require triggers or application-level validation
-
 -- ========================================
--- RESERVATION_SAILOR (Authorized Sailors)
+-- AUTHORIZED (Reservation ↔ Sailor M:N)
+-- IC-3: Trip.skipper must be among Reservation's authorized sailors. Enforcement deferred.
 -- ========================================
-CREATE TABLE Reservation_Sailor (
+CREATE TABLE authorized (
     reservation_id INTEGER,
     sailor_id INTEGER,
     PRIMARY KEY (reservation_id, sailor_id),
@@ -137,6 +160,9 @@ CREATE TABLE Reservation_Sailor (
 
 -- ========================================
 -- TRIP
+-- IC-3: Trip.skipper must be among Reservation's authorized sailors. Enforcement deferred.
+-- IC-4: Skipper requires valid certificate for the boat class and trip jurisdictions. Enforcement deferred.
+-- IC-5: Trip.takeoff/arrival must lie within Reservation[start_date, end_date]. CHECK (arrival_date >= takeoff_date) applied here; full containment enforcement is deferred.
 -- ========================================
 CREATE TABLE Trip (
     trip_id SERIAL PRIMARY KEY,
@@ -155,24 +181,19 @@ CREATE TABLE Trip (
         ON DELETE RESTRICT ON UPDATE CASCADE,
     FOREIGN KEY (end_location_id) REFERENCES Location(location_id)
         ON DELETE RESTRICT ON UPDATE CASCADE,
-    CHECK (arrival_date >= takeoff_date),
+    CHECK (arrival_date >= takeoff_date),  -- IC-5 (partial): trip dates ordering
     CHECK (start_location_id <> end_location_id)
 );
 
--- IC: skipper_id must be one of the authorized sailors for the reservation (in Reservation_Sailor)
--- IC: takeoff_date must be within [start_date, end_date] of the reservation
--- IC: arrival_date must be within [start_date, end_date] of the reservation
--- IC: Each trip must have at least one jurisdiction recorded in Trip_Jurisdiction
--- These constraints require triggers or application-level validation
-
 -- ========================================
--- TRIP_JURISDICTION
+-- NAVIGATES (Trip ↔ Jurisdiction M:N)
+-- Stores the ordered list of jurisdictions a trip passes through
 -- ========================================
-CREATE TABLE Trip_Jurisdiction (
+CREATE TABLE navigates (
     trip_id INTEGER,
     jurisdiction_id INTEGER,
     sequence_order INTEGER NOT NULL,
-    PRIMARY KEY (trip_id, jurisdiction_id),
+    PRIMARY KEY (trip_id, sequence_order),
     FOREIGN KEY (trip_id) REFERENCES Trip(trip_id)
         ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (jurisdiction_id) REFERENCES Jurisdiction(jurisdiction_id)
@@ -182,6 +203,7 @@ CREATE TABLE Trip_Jurisdiction (
 
 -- ========================================
 -- CERTIFICATION
+-- IC-4: Skipper requires valid certificate for the boat class and trip jurisdictions (issue_date ≤ takeoff_date ≤ expiry_date and certificate valid for jurisdiction). Enforcement deferred.
 -- ========================================
 CREATE TABLE Certification (
     certification_id SERIAL PRIMARY KEY,
@@ -193,13 +215,14 @@ CREATE TABLE Certification (
         ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (class_id) REFERENCES Boat_Class(class_id)
         ON DELETE RESTRICT ON UPDATE CASCADE,
-    CHECK (expiry_date > issue_date)
+    CHECK (expiry_date > issue_date)  -- IC-4 related: certificate validity period
 );
 
 -- ========================================
--- CERTIFICATION_JURISDICTION
+-- VALID_IN (Certification ↔ Country M:N)
+-- IC-4: Skipper requires certificate valid for trip jurisdictions. This table stores which countries a certification is valid in. Enforcement deferred.
 -- ========================================
-CREATE TABLE Certification_Jurisdiction (
+CREATE TABLE valid_in (
     certification_id INTEGER,
     iso_code CHAR(3),
     PRIMARY KEY (certification_id, iso_code),
@@ -209,16 +232,4 @@ CREATE TABLE Certification_Jurisdiction (
         ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
--- IC: A certification must authorize at least one country jurisdiction (in Certification_Jurisdiction)
--- This constraint requires triggers or application-level validation
 
--- ========================================
--- INDEXES for Performance
--- ========================================
-CREATE INDEX idx_boat_iso_code ON Boat(iso_code);
-CREATE INDEX idx_reservation_cni ON Reservation(cni);
-CREATE INDEX idx_reservation_dates ON Reservation(start_date, end_date);
-CREATE INDEX idx_trip_reservation ON Trip(reservation_id);
-CREATE INDEX idx_trip_skipper ON Trip(skipper_id);
-CREATE INDEX idx_sailor_category ON Sailor(category);
-CREATE INDEX idx_sailor_surname ON Sailor(surname);

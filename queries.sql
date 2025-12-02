@@ -58,8 +58,8 @@ WHERE NOT EXISTS (
     SELECT 1
     FROM Certification c
     WHERE c.sailor_id = s.sailor_id
-      AND c.class_name = b.class_name
-      AND c.issue_date <= CURRENT_DATE
-      AND c.expiry_date >= CURRENT_DATE
+      AND c.class_id = b.class_id  -- match certification to boat class by id
+      AND c.issue_date <= t.takeoff_date
+      AND c.expiry_date >= t.takeoff_date
 )
 ORDER BY full_name;
