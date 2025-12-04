@@ -35,7 +35,8 @@ DROP TABLE IF EXISTS Country CASCADE;
 -- ========================================
 CREATE TABLE Country (
     iso_code CHAR(3),
-    name VARCHAR(100) UNIQUE NOT NULL,
+    name VARCHAR(70) UNIQUE NOT NULL,
+    --verificar se faz sentido ser VARCHAR e ter este tamanho
     flag VARCHAR(255) UNIQUE NOT NULL,
     PRIMARY KEY(iso_code)
 );
@@ -44,9 +45,8 @@ CREATE TABLE Country (
 -- JURISDICTION
 -- ========================================
 CREATE TABLE Jurisdiction (
-    jurisdiction_id SERIAL,
-    name VARCHAR(200) NOT NULL,
-    PRIMARY KEY(jurisdiction_id)
+    name VARCHAR(200),
+    PRIMARY KEY(name)
 );
 
 -- ========================================
@@ -59,9 +59,9 @@ CREATE TABLE Jurisdiction (
 -- ========================================
 CREATE TABLE administers (
     iso_code CHAR(3),
-    jurisdiction_id INTEGER NOT NULL,
-    PRIMARY KEY(jurisdiction_id),
-    FOREIGN KEY(jurisdiction_id) REFERENCES Jurisdiction(jurisdiction_id)
+    name VARCHAR(200),
+    PRIMARY KEY(name),
+    FOREIGN KEY(name) REFERENCES Jurisdiction(name)
         ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY(iso_code) REFERENCES Country(iso_code)
         ON DELETE SET NULL ON UPDATE CASCADE
@@ -75,15 +75,13 @@ CREATE TABLE administers (
 -- IC-2: Any two Location points must be ≥ 1 nautical mile apart — geospatial rule (use PostGIS or trigger). Sample coordinates adjusted.
 -- ========================================
 CREATE TABLE Location (
-    location_id SERIAL,
+    iso_code CHAR(3),
+    latitude NUMERIC(8,6),
+    longitude NUMERIC(9,6),
     name VARCHAR(200) NOT NULL,
-    latitude DECIMAL(9,6) NOT NULL,
-    longitude DECIMAL(10,6) NOT NULL,
-    has_location_iso_code CHAR(3) NOT NULL,
-    PRIMARY KEY(location_id),
-    FOREIGN KEY (has_location_iso_code) REFERENCES Country(iso_code)
-        ON DELETE RESTRICT ON UPDATE CASCADE,
-    UNIQUE (latitude, longitude)
+    PRIMARY KEY(iso_code,latitude,longitude),
+    FOREIGN KEY (iso_code) REFERENCES Country(iso_code)
+        ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 -- ========================================
@@ -91,10 +89,9 @@ CREATE TABLE Location (
 -- IC-1: Boat.length ≤ Boat_Class.max_length — cross-table rule (enforcement deferred to trigger or application).
 -- ========================================
 CREATE TABLE Boat_Class (
-    class_id SERIAL,
-    class_name VARCHAR(50) UNIQUE NOT NULL,
-    max_length DECIMAL(6,2) NOT NULL CHECK (max_length > 0),
-    PRIMARY KEY(class_id)
+    max_length NUMERIC(6,2) CHECK (max_length > 0),
+    class_name VARCHAR(200) UNIQUE NOT NULL,
+    PRIMARY KEY(max_length)
 );
 
 -- ========================================
@@ -104,13 +101,13 @@ CREATE TABLE Boat_Class (
 CREATE TABLE Boat (
     cni VARCHAR(50),
     name VARCHAR(200) NOT NULL,
-    length DECIMAL(6,2) NOT NULL CHECK (length > 0),
-    registration_year INTEGER NOT NULL CHECK (registration_year >= 1900 AND registration_year <= 2100),
+    length NUMERIC(6,2) NOT NULL CHECK (length > 0),
+    registration_year INTEGER NOT NULL,
     picture BYTEA,
-    belongs_to_class_id INTEGER NOT NULL,
+    belongs_to_max_length NUMERIC(6,2) NOT NULL,
     registers_iso_code CHAR(3) NOT NULL,
     PRIMARY KEY(cni),
-    FOREIGN KEY (belongs_to_class_id) REFERENCES Boat_Class(class_id)
+    FOREIGN KEY (belongs_to_max_length) REFERENCES Boat_Class(max_length)
         ON DELETE RESTRICT ON UPDATE CASCADE,
     FOREIGN KEY (registers_iso_code) REFERENCES Country(iso_code)
         ON DELETE RESTRICT ON UPDATE CASCADE
@@ -121,9 +118,9 @@ CREATE TABLE Boat (
 -- ========================================
 CREATE TABLE Sailor (
     sailor_id SERIAL,
-    first_name VARCHAR(100) NOT NULL,
-    surname VARCHAR(100) NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
+    first_name VARCHAR(40) NOT NULL,
+    surname VARCHAR(40) NOT NULL,
+    email VARCHAR(254) UNIQUE NOT NULL,
     PRIMARY KEY(sailor_id)
 );
 
@@ -154,13 +151,12 @@ CREATE TABLE Junior (
 -- responsible_sailor_id references Senior (only Seniors can be responsible) — structurally enforced via FK
 -- ========================================
 CREATE TABLE Reservation (
-    reservation_id SERIAL,
-    start_date DATE NOT NULL,
-    end_date DATE NOT NULL,
-    reserves_cni VARCHAR(50) NOT NULL,
+    cni VARCHAR(50),
+    start_date DATE,
+    end_date DATE,
     responsible_for_sailor_id INTEGER NOT NULL,
-    PRIMARY KEY(reservation_id),
-    FOREIGN KEY (reserves_cni) REFERENCES Boat(cni)
+    PRIMARY KEY(cni,start_date, end_date),
+    FOREIGN KEY (cni) REFERENCES Boat(cni)
         ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (responsible_for_sailor_id) REFERENCES Senior(sailor_id)
         ON DELETE RESTRICT ON UPDATE CASCADE,
@@ -173,10 +169,12 @@ CREATE TABLE Reservation (
 -- IC-3: Trip.skipper must be among Reservation's authorized sailors. Enforcement deferred.
 -- ========================================
 CREATE TABLE authorized (
-    reservation_id INTEGER,
+    cni VARCHAR(50),
+    start_date DATE,
+    end_date DATE,
     sailor_id INTEGER,
-    PRIMARY KEY (reservation_id, sailor_id),
-    FOREIGN KEY (reservation_id) REFERENCES Reservation(reservation_id)
+    PRIMARY KEY (cni,start_date, end_date, sailor_id),
+    FOREIGN KEY (cni,start_date, end_date) REFERENCES Reservation(cni,start_date,end_date)
         ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (sailor_id) REFERENCES Sailor(sailor_id)
         ON DELETE RESTRICT ON UPDATE CASCADE
@@ -189,25 +187,30 @@ CREATE TABLE authorized (
 -- IC-5: Trip.takeoff/arrival must lie within Reservation[start_date, end_date]. CHECK (arrival_date >= takeoff_date) applied here; full containment enforcement is deferred.
 -- ========================================
 CREATE TABLE Trip (
-    trip_id SERIAL,
-    takeoff_date DATE NOT NULL,
-    arrival_date DATE NOT NULL,
+    cni VARCHAR(50),
+    start_date DATE,
+    end_date DATE,
+    takeoff_date DATE,
+    arrival_date DATE,
     insurance_reference VARCHAR(100) NOT NULL,
-    starts_at_location_id INTEGER NOT NULL,
-    ends_at_location_id INTEGER NOT NULL,
-    includes_reservation_id INTEGER NOT NULL,
+    starts_at_iso CHAR(3) NOT NULL,
+    starts_at_latitude NUMERIC(8,6) NOT NULL,
+    starts_at_longitude NUMERIC(9,6) NOT NULL,
+    ends_at_iso CHAR(3) NOT NULL,
+    ends_at_latitude NUMERIC(8,6) NOT NULL,
+    ends_at_longitude NUMERIC(9,6) NOT NULL,
     skippers_sailor_id INTEGER NOT NULL,
-    PRIMARY KEY(trip_id),
-    FOREIGN KEY (includes_reservation_id) REFERENCES Reservation(reservation_id)
+    PRIMARY KEY(cni, start_date, end_date, takeoff_date,arrival_date),
+    FOREIGN KEY (cni,start_date,end_date) REFERENCES Reservation(cni,start_date,end_date)
         ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (skippers_sailor_id) REFERENCES Sailor(sailor_id)
         ON DELETE RESTRICT ON UPDATE CASCADE,
-    FOREIGN KEY (starts_at_location_id) REFERENCES Location(location_id)
+    FOREIGN KEY (starts_at_iso,starts_at_latitude, starts_at_longitude) REFERENCES Location(iso_code,latitude,longitude)
         ON DELETE RESTRICT ON UPDATE CASCADE,
-    FOREIGN KEY (ends_at_location_id) REFERENCES Location(location_id)
+    FOREIGN KEY (ends_at_iso,ends_at_latitude, ends_at_longitude) REFERENCES Location(iso_code,latitude,longitude)
         ON DELETE RESTRICT ON UPDATE CASCADE,
     CHECK (arrival_date >= takeoff_date),  -- IC-5 (partial): trip dates ordering
-    CHECK (starts_at_location_id <> ends_at_location_id)
+    CHECK (NOT (starts_at_latitude = ends_at_latitude AND starts_at_longitude = ends_at_longitude))
     -- Every Trip must exist in the table 'navigates'
 );
 
@@ -216,15 +219,20 @@ CREATE TABLE Trip (
 -- Stores the ordered list of jurisdictions a trip passes through
 -- ========================================
 CREATE TABLE navigates (
-    trip_id INTEGER,
-    jurisdiction_id INTEGER,
-    sequence_order INTEGER NOT NULL,
-    PRIMARY KEY (trip_id, sequence_order),
-    FOREIGN KEY (trip_id) REFERENCES Trip(trip_id)
+    cni VARCHAR(50),
+    start_date DATE,
+    end_date DATE,
+    takeoff_date DATE,
+    arrival_date DATE,
+    name VARCHAR(200),
+    --nao sei se devia ser integer a record list
+    record_list INTEGER NOT NULL,
+    PRIMARY KEY (cni, start_date, end_date, takeoff_date,arrival_date,name),
+    FOREIGN KEY (cni, start_date, end_date, takeoff_date, arrival_date) REFERENCES Trip(cni, start_date, end_date,takeoff_date, arrival_date)
         ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (jurisdiction_id) REFERENCES Jurisdiction(jurisdiction_id)
+    FOREIGN KEY (name) REFERENCES Jurisdiction(name)
         ON DELETE RESTRICT ON UPDATE CASCADE,
-    CHECK (sequence_order > 0)
+    CHECK (record_list > 0)
 );
 
 -- ========================================
@@ -232,18 +240,14 @@ CREATE TABLE navigates (
 -- IC-4: Skipper requires valid certificate for the boat class and trip jurisdictions (issue_date ≤ takeoff_date ≤ expiry_date and certificate valid for jurisdiction). Enforcement deferred.
 -- ========================================
 CREATE TABLE Certification (
-    certification_id SERIAL,
-    issue_date DATE NOT NULL,
+    sailor_id INTEGER,
+    issue_date DATE,
     expiry_date DATE NOT NULL,
-    holds_sailor_id INTEGER NOT NULL,
-    certifies_for_class_id INTEGER NOT NULL,
-    PRIMARY KEY(certification_id),
-    FOREIGN KEY (holds_sailor_id) REFERENCES Sailor(sailor_id)
+    PRIMARY KEY(sailor_id,issue_date),
+    FOREIGN KEY (sailor_id) REFERENCES Sailor(sailor_id)
         ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (certifies_for_class_id) REFERENCES Boat_Class(class_id)
-        ON DELETE RESTRICT ON UPDATE CASCADE,
     CHECK (expiry_date > issue_date)  -- IC-4 related: certificate validity period
-    -- Every Certification must exist in the table 'manages'
+    -- Every Certification must exist in the table 'valid_in' and table 'certifies_for'
 );
 
 -- ========================================
@@ -251,13 +255,28 @@ CREATE TABLE Certification (
 -- IC-4: Skipper requires certificate valid for trip jurisdictions. This table stores which countries a certification is valid in. Enforcement deferred.
 -- ========================================
 CREATE TABLE valid_in (
-    certification_id INTEGER,
-    iso_code CHAR(3),
-    PRIMARY KEY (certification_id, iso_code),
-    FOREIGN KEY (certification_id) REFERENCES Certification(certification_id)
+    sailor_id INTEGER,
+    issue_date DATE,
+    name VARCHAR(200),
+    PRIMARY KEY (sailor_id,issue_date, name),
+    FOREIGN KEY (sailor_id, issue_date) REFERENCES Certification(sailor_id, issue_date)
         ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (iso_code) REFERENCES Country(iso_code)
+    FOREIGN KEY (name) REFERENCES Jurisdiction(name)
         ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- ========================================
+-- CERTIFIES_FOR (Certification ↔ Boat Class M:N)
+-- ========================================
+CREATE TABLE certifies_for (
+    sailor_id INTEGER,
+    issue_date DATE,
+    max_length NUMERIC(6,2),
+    PRIMARY KEY(sailor_id, issue_date, max_length),
+    FOREIGN KEY (sailor_id, issue_date) REFERENCES Certification(sailor_id, issue_date)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY(max_length) REFERENCES Boat_Class(max_length)
+        ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 
