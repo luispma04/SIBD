@@ -8,25 +8,32 @@
 -- QUERY A
 -- The name of all boats that are used in some trip
 -- ========================================
-SELECT DISTINCT b.name
-FROM Boat b
-INNER JOIN Reservation r ON b.cni = r.cni
-INNER JOIN Trip t ON r.reservation_id = t.reservation_id
-ORDER BY b.name;
+SELECT DISTINCT boat1.name
+FROM Boat boat1
+INNER JOIN Reservation reservation1 ON boat1.country_iso_code = reservation1.country_iso_code AND boat1.cni = reservation1.boat_cni
+INNER JOIN Trip trip1 ON reservation1.country_iso_code = trip1.country_iso_code 
+                      AND reservation1.boat_cni = trip1.boat_cni 
+                      AND reservation1.start_date = trip1.reservation_start_date 
+                      AND reservation1.end_date = trip1.reservation_end_date
+ORDER BY boat1.name;
 
 
 -- ========================================
 -- QUERY B
 -- The name of all boats that are not used in any trip
 -- ========================================
-SELECT DISTINCT b.name
-FROM Boat b
-WHERE b.cni NOT IN (
-    SELECT DISTINCT r.cni
-    FROM Reservation r
-    INNER JOIN Trip t ON r.reservation_id = t.reservation_id
+SELECT DISTINCT boat1.name
+FROM Boat boat1
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM Reservation reservation1
+    INNER JOIN Trip trip1 ON reservation1.country_iso_code = trip1.country_iso_code 
+                          AND reservation1.boat_cni = trip1.boat_cni 
+                          AND reservation1.start_date = trip1.reservation_start_date 
+                          AND reservation1.end_date = trip1.reservation_end_date
+    WHERE boat1.country_iso_code = reservation1.country_iso_code AND boat1.cni = reservation1.boat_cni
 )
-ORDER BY b.name;
+ORDER BY boat1.name;
 
 
 -- ========================================
@@ -35,13 +42,14 @@ ORDER BY b.name;
 -- for which at least one responsible for a reservation 
 -- has a surname that ends with 'Santos'
 -- ========================================
-SELECT DISTINCT b.name
-FROM Boat b
-INNER JOIN Reservation r ON b.cni = r.cni
-INNER JOIN Sailor s ON r.responsible_sailor_id = s.sailor_id
-WHERE b.iso_code = 'PRT'
-  AND s.surname LIKE '%Santos'
-ORDER BY b.name;
+SELECT DISTINCT boat1.name
+FROM Boat boat1
+INNER JOIN Reservation reservation1 ON boat1.country_iso_code = reservation1.country_iso_code AND boat1.cni = reservation1.boat_cni
+INNER JOIN Senior senior1 ON reservation1.responsible_for_sailor_id = senior1.senior_id
+INNER JOIN Sailor sailor1 ON senior1.senior_id = sailor1.id
+WHERE boat1.country_iso_code = 'PRT'
+  AND sailor1.surname LIKE '%Santos'
+ORDER BY boat1.name;
 
 
 -- ========================================
@@ -49,17 +57,22 @@ ORDER BY b.name;
 -- The full name of all skippers without any certificate 
 -- corresponding to the class of the trip's boat
 -- ========================================
-SELECT DISTINCT s.first_name || ' ' || s.surname AS full_name
-FROM Sailor s
-INNER JOIN Trip t ON s.sailor_id = t.skipper_id
-INNER JOIN Reservation r ON t.reservation_id = r.reservation_id
-INNER JOIN Boat b ON r.cni = b.cni
+SELECT DISTINCT sailor1.first_name || ' ' || sailor1.surname AS full_name
+FROM Sailor sailor1
+INNER JOIN Trip trip1 ON sailor1.id = trip1.skippers_id
+INNER JOIN Reservation reservation1 ON trip1.country_iso_code = reservation1.country_iso_code 
+                                    AND trip1.boat_cni = reservation1.boat_cni 
+                                    AND trip1.reservation_start_date = reservation1.start_date 
+                                    AND trip1.reservation_end_date = reservation1.end_date
+INNER JOIN Boat boat1 ON reservation1.country_iso_code = boat1.country_iso_code AND reservation1.boat_cni = boat1.cni
 WHERE NOT EXISTS (
     SELECT 1
-    FROM Certification c
-    WHERE c.sailor_id = s.sailor_id
-      AND c.class_id = b.class_id  -- match certification to boat class by id
-      AND c.issue_date <= t.takeoff_date
-      AND c.expiry_date >= t.takeoff_date
+    FROM Certification certification1
+    INNER JOIN certifies_for cert_class1 ON certification1.sailor_id = cert_class1.sailor_id 
+                                         AND certification1.issue_date = cert_class1.certification_issue_date
+    WHERE certification1.sailor_id = sailor1.id
+      AND cert_class1.class_name = boat1.class_name
+      AND certification1.issue_date <= trip1.takeoff_date
+      AND certification1.expiry_date >= trip1.arrival_date
 )
 ORDER BY full_name;

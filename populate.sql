@@ -2,68 +2,93 @@
 -- SIBD 2025/2026 - Project Part 1
 -- Boating Management System
 -- Database Population Script
+-- (aligned with composite keys in schema.sql)
 -- ========================================
-
-/* ========================================
-   Sample data conforms to the following ICs:
-   IC-1: Boat.length ≤ Boat_Class.max_length — verified for all boats
-   IC-2: Locations ≥ 1 nmi apart — coordinates chosen to satisfy
-   IC-3: Trip.skipper ∈ Reservation.authorized — verified for all trips
-   IC-4: Skipper has valid certificate for boat class and trip jurisdictions
-   IC-5: Trip dates within Reservation interval — verified for all trips
-   ======================================== */
 
 -- ========================================
 -- COUNTRIES
 -- ========================================
 INSERT INTO Country (iso_code, name, flag) VALUES
-('PRT', 'Portugal', 'flag_portugal.png'),
-('ESP', 'Spain', 'flag_spain.png'),
-('FRA', 'France', 'flag_france.png'),
-('ITA', 'Italy', 'flag_italy.png'),
-('GBR', 'United Kingdom', 'flag_uk.png'),
-('USA', 'United States', 'flag_usa.png'),
-('BRA', 'Brazil', 'flag_brazil.png');
+('PRT', 'Portugal', 'https://example.com/countries/portugal_flag.jpg'),
+('ESP', 'Spain', 'https://example.com/countries/spain_flag.jpg'),
+('FRA', 'France', 'https://example.com/countries/france_flag.jpg'),
+('ITA', 'Italy', 'https://example.com/countries/italy_flag.jpg'),
+('GBR', 'United Kingdom', 'https://example.com/countries/uk_flag.jpg'),
+('USA', 'United States', 'https://example.com/countries/usa_flag.jpg'),
+('BRA', 'Brazil', 'https://example.com/countries/brazil_flag.jpg');
 
 -- ========================================
 -- JURISDICTIONS
 -- ========================================
-INSERT INTO Jurisdiction (name, iso_code) VALUES
-('Portuguese Internal Waters', 'PRT'),
-('Portuguese Territorial Sea', 'PRT'),
-('Portuguese EEZ', 'PRT'),
-('Spanish Internal Waters', 'ESP'),
-('Spanish Territorial Sea', 'ESP'),
-('Spanish EEZ', 'ESP'),
-('French Internal Waters', 'FRA'),
-('French Territorial Sea', 'FRA'),
-('Italian Internal Waters', 'ITA'),
-('British Internal Waters', 'GBR'),
-('US Internal Waters', 'USA'),
-('International Waters', NULL),
-('Brazilian Internal Waters', 'BRA');
+INSERT INTO Jurisdiction (name) VALUES
+('Portuguese Internal Waters'),
+('Portuguese Territorial Sea'),
+('Portuguese EEZ'),
+('Spanish Internal Waters'),
+('Spanish Territorial Sea'),
+('Spanish EEZ'),
+('French Internal Waters'),
+('French Territorial Sea'),
+('Italian Internal Waters'),
+('British Internal Waters'),
+('US Internal Waters'),
+('International Waters'),
+('Brazilian Internal Waters');
+
+-- ========================================
+-- ADMINISTERS (Country 1 : M Jurisdiction)
+-- ========================================
+INSERT INTO administers (country_iso_code, jurisdiction_name) VALUES
+('PRT', 'Portuguese Internal Waters'),
+('PRT', 'Portuguese Territorial Sea'),
+('PRT', 'Portuguese EEZ'),
+('ESP', 'Spanish Internal Waters'),
+('ESP', 'Spanish Territorial Sea'),
+('ESP', 'Spanish EEZ'),
+('FRA', 'French Internal Waters'),
+('FRA', 'French Territorial Sea'),
+('ITA', 'Italian Internal Waters'),
+('GBR', 'British Internal Waters'),
+('USA', 'US Internal Waters'),
+('BRA', 'Brazilian Internal Waters'),
+(NULL, 'International Waters');
 
 -- ========================================
 -- LOCATIONS
--- IC-2: Any two Location points must be ≥ 1 nautical mile apart. Coordinates verified.
 -- ========================================
-INSERT INTO Location (name, latitude, longitude, iso_code) VALUES
-('Lisbon Marina', 38.706944, -9.135278, 'PRT'),
-('Cascais Harbor', 38.697222, -9.420833, 'PRT'),
-('Faro Marina', 37.019167, -7.930833, 'PRT'),
-('Cadiz Port', 36.527778, -6.288889, 'ESP'),
-('Barcelona Port', 41.375833, 2.183056, 'ESP'),
-('Marseille Port', 43.296389, 5.369722, 'FRA'),
-('Nice Harbor', 43.695556, 7.282222, 'FRA'),
-('Naples Port', 40.838611, 14.252778, 'ITA'),
-('Southampton Marina', 50.899722, -1.404167, 'GBR'),
-('Miami Marina', 25.775278, -80.186944, 'USA'),
-('Rio de Janeiro Marina', -22.968333, -43.173056, 'BRA');
+INSERT INTO Location (latitude, longitude, name) VALUES
+(38.706944, -9.135278, 'Lisbon Marina'),
+(38.697222, -9.420833, 'Cascais Harbor'),
+(37.019167, -7.930833, 'Faro Marina'),
+(36.527778, -6.288889, 'Cadiz Port'),
+(41.375833,  2.183056, 'Barcelona Port'),
+(43.296389,  5.369722, 'Marseille Port'),
+(43.695556,  7.282222, 'Nice Harbor'),
+(40.838611, 14.252778, 'Naples Port'),
+(50.899722, -1.404167, 'Southampton Marina'),
+(25.775278, -80.186944,'Miami Marina'),
+(-22.968333,-43.173056,'Rio de Janeiro Marina');
+
+-- ========================================
+-- HAS_LOCATION (assign each location to a country)
+-- ========================================
+INSERT INTO has_location (country_iso_code, location_latitude, location_longitude) VALUES
+('PRT', 38.706944, -9.135278),
+('PRT', 38.697222, -9.420833),
+('PRT', 37.019167, -7.930833),
+('ESP', 36.527778, -6.288889),
+('ESP', 41.375833,  2.183056),
+('FRA', 43.296389,  5.369722),
+('FRA', 43.695556,  7.282222),
+('ITA', 40.838611, 14.252778),
+('GBR', 50.899722, -1.404167),
+('USA', 25.775278, -80.186944),
+('BRA', -22.968333,-43.173056);
 
 -- ========================================
 -- BOAT CLASSES
 -- ========================================
-INSERT INTO Boat_Class (class_name, max_length) VALUES
+INSERT INTO Boat_Class (name, max_length) VALUES
 ('Class 1', 15.00),
 ('Class 2', 25.00),
 ('Class 3', 40.00),
@@ -71,271 +96,433 @@ INSERT INTO Boat_Class (class_name, max_length) VALUES
 ('Class 5', 100.00);
 
 -- ========================================
--- BOATS
--- IC-1: Each boat length must be ≤ its class max_length. Verified against Boat_Class.
+-- BOATS (composite PK: country_iso_code, cni)
 -- ========================================
-INSERT INTO Boat (cni, name, length, registration_year, class_id, iso_code, picture) VALUES
-('PRT-2020-001', 'Ocean Explorer', 14.50, 2020, 1, 'PRT', NULL),   -- Class 1 (max 15.00) ✔
-('PRT-2019-042', 'Sea Breeze', 23.00, 2019, 2, 'PRT', NULL),       -- Class 2 (max 25.00) ✔
-('PRT-2021-015', 'Atlantic Dream', 38.50, 2021, 3, 'PRT', NULL),   -- Class 3 (max 40.00) ✔
-('ESP-2018-123', 'Mediterranean Star', 22.00, 2018, 2, 'ESP', NULL), -- Class 2 (max 25.00) ✔
-('ESP-2022-056', 'Costa Brava', 55.00, 2022, 4, 'ESP', NULL),       -- Class 4 (max 60.00) ✔
-('FRA-2020-089', 'Cote d Azur', 35.00, 2020, 3, 'FRA', NULL),       -- Class 3 (max 40.00) ✔
-('ITA-2019-234', 'Bella Vista', 24.00, 2019, 2, 'ITA', NULL),       -- Class 2 (max 25.00) ✔
-('GBR-2021-777', 'British Sailor', 58.00, 2021, 4, 'GBR', NULL),    -- Class 4 (max 60.00) ✔
-('USA-2023-999', 'Freedom Wave', 95.00, 2023, 5, 'USA', NULL),      -- Class 5 (max 100.00) ✔
-('BRA-2020-444', 'Copacabana', 39.00, 2020, 3, 'BRA', NULL);        -- Class 3 (max 40.00) ✔
+INSERT INTO Boat (cni, country_iso_code, class_name, name, length, registration_year, picture) VALUES
+('2020-001', 'PRT', 'Class 1', 'Ocean Explorer',     14.50, 2020, 'https://example.com/boats/ocean-explorer.jpg'),
+('2019-042', 'PRT', 'Class 2', 'Sea Breeze',         23.00, 2019, 'https://example.com/boats/sea-breeze.jpg'),
+('2021-015', 'PRT', 'Class 3', 'Atlantic Dream',     38.50, 2021, 'https://example.com/boats/atlantic-dream.jpg'),
+('2018-123', 'ESP', 'Class 2', 'Mediterranean Star', 22.00, 2018, 'https://example.com/boats/mediterranean-star.jpg'),
+('2022-056', 'ESP', 'Class 4', 'Costa Brava',        55.00, 2022, 'https://example.com/boats/costa-brava.jpg'),
+('2020-089', 'FRA', 'Class 3', 'Cote d Azur',        35.00, 2020, 'https://example.com/boats/cote-d-azur.jpg'),
+('2019-234', 'ITA', 'Class 2', 'Bella Vista',        24.00, 2019, 'https://example.com/boats/bella-vista.jpg'),
+('2021-777', 'GBR', 'Class 4', 'British Sailor',     58.00, 2021, 'https://example.com/boats/british-sailor.jpg'),
+('2023-999', 'USA', 'Class 5', 'Freedom Wave',       95.00, 2023, 'https://example.com/boats/freedom-wave.jpg'),
+('2020-444', 'BRA', 'Class 3', 'Copacabana',         39.00, 2020, 'https://example.com/boats/copacabana.jpg');
 
 -- ========================================
--- SAILORS (Supertype)
+-- SAILORS
 -- ========================================
 INSERT INTO Sailor (first_name, surname, email) VALUES
-('Joao', 'Santos', 'joao.santos@email.com'),
-('Maria', 'Silva', 'maria.silva@email.com'),
-('Pedro', 'Santos', 'pedro.santos@email.com'),
-('Ana', 'Costa', 'ana.costa@email.com'),
-('Carlos', 'Ferreira', 'carlos.ferreira@email.com'),
-('Isabel', 'Oliveira', 'isabel.oliveira@email.com'),
-('Ricardo', 'Pereira', 'ricardo.pereira@email.com'),
-('Sofia', 'Rodrigues', 'sofia.rodrigues@email.com'),
-('Miguel', 'Alves', 'miguel.alves@email.com'),
-('Beatriz', 'Santos', 'beatriz.santos@email.com'),
-('Fernando', 'Gomes', 'fernando.gomes@email.com'),
-('Lucia', 'Martins', 'lucia.martins@email.com');
+('Joao',     'Santos',    'joao.santos@email.com'),
+('Maria',    'Silva',     'maria.silva@email.com'),
+('Pedro',    'Santos',    'pedro.santos@email.com'),
+('Ana',      'Costa',     'ana.costa@email.com'),
+('Carlos',   'Ferreira',  'carlos.ferreira@email.com'),
+('Isabel',   'Oliveira',  'isabel.oliveira@email.com'),
+('Ricardo',  'Pereira',   'ricardo.pereira@email.com'),
+('Sofia',    'Rodrigues', 'sofia.rodrigues@email.com'),
+('Miguel',   'Alves',     'miguel.alves@email.com'),
+('Beatriz',  'Santos',    'beatriz.santos@email.com'),
+('Fernando', 'Gomes',     'fernando.gomes@email.com'),
+('Lucia',    'Martins',   'lucia.martins@email.com');
 
 -- ========================================
--- SENIOR (ISA subtype - can be responsible for reservations)
+-- SENIOR / JUNIOR
 -- ========================================
-INSERT INTO Senior (sailor_id) VALUES
-(1),   -- Joao Santos
-(2),   -- Maria Silva
-(3),   -- Pedro Santos
-(5),   -- Carlos Ferreira
-(7),   -- Ricardo Pereira
-(9),   -- Miguel Alves
-(11);  -- Fernando Gomes
+INSERT INTO Senior (senior_id) VALUES
+(1),(2),(3),(5),(7),(9),(11);
+
+INSERT INTO Junior (junior_id) VALUES
+(4),(6),(8),(10),(12);
 
 -- ========================================
--- JUNIOR (ISA subtype)
+-- RESERVATIONS (composite PK)
 -- ========================================
-INSERT INTO Junior (sailor_id) VALUES
-(4),   -- Ana Costa
-(6),   -- Isabel Oliveira
-(8),   -- Sofia Rodrigues
-(10),  -- Beatriz Santos
-(12);  -- Lucia Martins
+INSERT INTO Reservation (country_iso_code, boat_cni, start_date, end_date, responsible_for_sailor_id) VALUES
+('PRT', '2020-001', '2025-06-01', '2025-06-07', 1),  -- Joao
+('PRT', '2019-042', '2025-06-15', '2025-06-20', 2),  -- Maria
+('PRT', '2021-015', '2025-07-01', '2025-07-10', 3),  -- Pedro
+('ESP', '2018-123', '2025-07-15', '2025-07-22', 5),  -- Carlos
+('ESP', '2022-056', '2025-08-01', '2025-08-15', 7),  -- Ricardo
+('FRA', '2020-089', '2025-08-20', '2025-08-30', 9),  -- Miguel
+('ITA', '2019-234', '2025-09-01', '2025-09-10', 11), -- Fernando
+('PRT', '2020-001', '2025-09-15', '2025-09-22', 1),  -- Joao (second reservation)
+('PRT', '2019-042', '2025-10-01', '2025-10-05', 3);  -- Pedro
 
 -- ========================================
--- RESERVATIONS
+-- AUTHORIZED (Reservation  Sailor)
 -- ========================================
-INSERT INTO Reservation (cni, start_date, end_date, responsible_sailor_id) VALUES
-('PRT-2020-001', '2025-06-01', '2025-06-07', 1),  -- Joao Santos (Senior)
-('PRT-2019-042', '2025-06-15', '2025-06-20', 2),  -- Maria Silva (Senior)
-('PRT-2021-015', '2025-07-01', '2025-07-10', 3),  -- Pedro Santos (Senior)
-('ESP-2018-123', '2025-07-15', '2025-07-22', 5),  -- Carlos Ferreira (Senior)
-('ESP-2022-056', '2025-08-01', '2025-08-15', 7),  -- Ricardo Pereira (Senior)
-('FRA-2020-089', '2025-08-20', '2025-08-30', 9),  -- Miguel Alves (Senior)
-('ITA-2019-234', '2025-09-01', '2025-09-10', 11), -- Fernando Gomes (Senior)
-('PRT-2020-001', '2025-09-15', '2025-09-22', 1),  -- Joao Santos (Senior) - second reservation
-('PRT-2019-042', '2025-10-01', '2025-10-05', 3);  -- Pedro Santos (Senior)
-
--- ========================================
--- AUTHORIZED (Reservation ↔ Sailor M:N)
--- Both Seniors and Juniors can be authorized sailors
--- ========================================
-INSERT INTO authorized (reservation_id, sailor_id) VALUES
+INSERT INTO authorized (country_iso_code, boat_cni, reservation_start_date, reservation_end_date, sailor_id) VALUES
 -- Reservation 1
-(1, 1),  -- Joao Santos (Senior, Responsible)
-(1, 4),  -- Ana Costa (Junior)
-(1, 6),  -- Isabel Oliveira (Junior)
+('PRT','2020-001','2025-06-01','2025-06-07',1),
+('PRT','2020-001','2025-06-01','2025-06-07',4),
+('PRT','2020-001','2025-06-01','2025-06-07',6),
 -- Reservation 2
-(2, 2),  -- Maria Silva (Senior, Responsible)
-(2, 8),  -- Sofia Rodrigues (Junior)
+('PRT','2019-042','2025-06-15','2025-06-20',2),
+('PRT','2019-042','2025-06-15','2025-06-20',8),
 -- Reservation 3
-(3, 3),  -- Pedro Santos (Senior, Responsible)
-(3, 4),  -- Ana Costa (Junior)
-(3, 10), -- Beatriz Santos (Junior)
+('PRT','2021-015','2025-07-01','2025-07-10',3),
+('PRT','2021-015','2025-07-01','2025-07-10',4),
+('PRT','2021-015','2025-07-01','2025-07-10',10),
 -- Reservation 4
-(4, 5),  -- Carlos Ferreira (Senior, Responsible)
-(4, 6),  -- Isabel Oliveira (Junior)
+('ESP','2018-123','2025-07-15','2025-07-22',5),
+('ESP','2018-123','2025-07-15','2025-07-22',6),
 -- Reservation 5
-(5, 7),  -- Ricardo Pereira (Senior, Responsible)
-(5, 8),  -- Sofia Rodrigues (Junior)
-(5, 12), -- Lucia Martins (Junior)
+('ESP','2022-056','2025-08-01','2025-08-15',7),
+('ESP','2022-056','2025-08-01','2025-08-15',8),
+('ESP','2022-056','2025-08-01','2025-08-15',12),
 -- Reservation 6
-(6, 9),  -- Miguel Alves (Senior, Responsible)
-(6, 10), -- Beatriz Santos (Junior)
+('FRA','2020-089','2025-08-20','2025-08-30',9),
+('FRA','2020-089','2025-08-20','2025-08-30',10),
 -- Reservation 7
-(7, 11), -- Fernando Gomes (Senior, Responsible)
-(7, 12), -- Lucia Martins (Junior)
+('ITA','2019-234','2025-09-01','2025-09-10',11),
+('ITA','2019-234','2025-09-01','2025-09-10',12),
 -- Reservation 8
-(8, 1),  -- Joao Santos (Senior, Responsible)
-(8, 6),  -- Isabel Oliveira (Junior)
+('PRT','2020-001','2025-09-15','2025-09-22',1),
+('PRT','2020-001','2025-09-15','2025-09-22',6),
 -- Reservation 9
-(9, 3),  -- Pedro Santos (Senior, Responsible)
-(9, 10); -- Beatriz Santos (Junior)
+('PRT','2019-042','2025-10-01','2025-10-05',3),
+('PRT','2019-042','2025-10-01','2025-10-05',10);
 
 -- ========================================
--- TRIPS
--- IC-3: skipper_id must be in authorized for that reservation
--- IC-4: skipper must have valid certificate for boat class
--- IC-5: takeoff/arrival dates must be within reservation [start_date, end_date]
+-- TRIPS (composite PK)
+-- dates inside reservation intervals; skippers are authorized
 -- ========================================
-INSERT INTO Trip (reservation_id, skipper_id, start_location_id, end_location_id, 
-                  takeoff_date, arrival_date, insurance_reference) VALUES
--- Trips for Reservation 1 (authorized: 1,4,6; boat: PRT-2020-001 Class 1; dates: 2025-06-01 to 2025-06-07)
-(1, 1, 1, 2, '2025-06-02', '2025-06-02', 'INS-2025-001'),  -- skipper 1 (Joao) authorized ✔
-(1, 1, 2, 3, '2025-06-04', '2025-06-05', 'INS-2025-002'),  -- skipper 1 (Joao) authorized ✔ (changed from 4)
--- Trips for Reservation 2 (authorized: 2,8; boat: PRT-2019-042 Class 2; dates: 2025-06-15 to 2025-06-20)
-(2, 2, 1, 3, '2025-06-16', '2025-06-17', 'INS-2025-003'),  -- skipper 2 (Maria) authorized ✔
--- Trips for Reservation 3 (authorized: 3,4,10; boat: PRT-2021-015 Class 3; dates: 2025-07-01 to 2025-07-10)
-(3, 3, 3, 4, '2025-07-02', '2025-07-04', 'INS-2025-004'),  -- skipper 3 (Pedro) authorized ✔
-(3, 3, 4, 5, '2025-07-06', '2025-07-08', 'INS-2025-005'),  -- skipper 3 (Pedro) authorized ✔ (changed from 10)
--- Trips for Reservation 4 (authorized: 5,6; boat: ESP-2018-123 Class 2; dates: 2025-07-15 to 2025-07-22)
-(4, 5, 5, 6, '2025-07-16', '2025-07-18', 'INS-2025-006'),  -- skipper 5 (Carlos) authorized ✔
--- Trips for Reservation 5 (authorized: 7,8,12; boat: ESP-2022-056 Class 4; dates: 2025-08-01 to 2025-08-15)
-(5, 7, 2, 4, '2025-08-03', '2025-08-06', 'INS-2025-007'),  -- skipper 7 (Ricardo) authorized ✔
--- Trips for Reservation 6 (authorized: 9,10; boat: FRA-2020-089 Class 3; dates: 2025-08-20 to 2025-08-30)
-(6, 9, 6, 7, '2025-08-22', '2025-08-24', 'INS-2025-008'),  -- skipper 9 (Miguel) authorized ✔
--- Trips for Reservation 7 (no trips - for Query B)
--- Trips for Reservation 8 (authorized: 1,6; boat: PRT-2020-001 Class 1; dates: 2025-09-15 to 2025-09-22)
-(8, 1, 1, 2, '2025-09-16', '2025-09-17', 'INS-2025-009'); -- skipper 1 (Joao) authorized ✔
--- Reservation 9 has no trips
+INSERT INTO Trip (
+    country_iso_code, boat_cni, reservation_start_date, reservation_end_date,
+    takeoff_date, arrival_date, insurance_reference,
+    starts_at_latitude, starts_at_longitude,
+    ends_at_latitude,   ends_at_longitude,
+    skippers_id
+) VALUES
+-- Reservation 1 trips (boat PRT/2020-001, Class 1)
+('PRT','2020-001','2025-06-01','2025-06-07','2025-06-02','2025-06-02','INS-2025-001',
+ 38.706944,-9.135278, 38.697222,-9.420833, 1),
+('PRT','2020-001','2025-06-01','2025-06-07','2025-06-04','2025-06-05','INS-2025-002',
+ 38.697222,-9.420833, 37.019167,-7.930833, 1),
+-- Reservation 2 trip (boat PRT/2019-042, Class 2)
+('PRT','2019-042','2025-06-15','2025-06-20','2025-06-16','2025-06-17','INS-2025-003',
+ 38.706944,-9.135278, 37.019167,-7.930833, 2),
+-- Reservation 3 trips (boat PRT/2021-015, Class 3)
+('PRT','2021-015','2025-07-01','2025-07-10','2025-07-02','2025-07-04','INS-2025-004',
+ 37.019167,-7.930833, 36.527778,-6.288889, 3),
+('PRT','2021-015','2025-07-01','2025-07-10','2025-07-06','2025-07-08','INS-2025-005',
+ 36.527778,-6.288889, 41.375833, 2.183056, 3),
+-- Reservation 4 trip (boat ESP/2018-123, Class 2)
+('ESP','2018-123','2025-07-15','2025-07-22','2025-07-16','2025-07-18','INS-2025-006',
+ 36.527778,-6.288889, 41.375833, 2.183056, 5),
+-- Reservation 5 trip (boat ESP/2022-056, Class 4)
+('ESP','2022-056','2025-08-01','2025-08-15','2025-08-03','2025-08-06','INS-2025-007',
+ 41.375833, 2.183056, 43.296389, 5.369722, 7),
+-- Reservation 6 trip (boat FRA/2020-089, Class 3)
+('FRA','2020-089','2025-08-20','2025-08-30','2025-08-22','2025-08-24','INS-2025-008',
+ 43.296389, 5.369722, 43.695556, 7.282222, 9),
+-- Reservation 8 trip (boat PRT/2020-001, Class 1)
+('PRT','2020-001','2025-09-15','2025-09-22','2025-09-16','2025-09-17','INS-2025-009',
+ 38.706944,-9.135278, 38.697222,-9.420833, 1);
+-- Reservation 7 and 9: no trips (left empty on purpose)
 
 -- ========================================
--- NAVIGATES (Trip ↔ Jurisdiction M:N)
+-- NAVIGATES (Trip  Jurisdiction)
 -- ========================================
-INSERT INTO navigates (trip_id, jurisdiction_id, sequence_order) VALUES
--- Trip 1: Lisbon to Cascais
-(1, 1, 1), -- Portuguese Internal Waters
-(1, 2, 2), -- Portuguese Territorial Sea
--- Trip 2: Cascais to Faro
-(2, 2, 1), -- Portuguese Territorial Sea
-(2, 3, 2), -- Portuguese EEZ
-(2, 1, 3), -- Portuguese Internal Waters
--- Trip 3: Lisbon to Faro
-(3, 1, 1), -- Portuguese Internal Waters
-(3, 2, 2), -- Portuguese Territorial Sea
-(3, 3, 3), -- Portuguese EEZ
--- Trip 4: Faro to Cadiz (crossing to Spain)
-(4, 1, 1), -- Portuguese Internal Waters
-(4, 2, 2), -- Portuguese Territorial Sea
-(4, 3, 3), -- Portuguese EEZ
-(4, 12, 4), -- International Waters
-(4, 6, 5), -- Spanish EEZ
-(4, 5, 6), -- Spanish Territorial Sea
-(4, 4, 7), -- Spanish Internal Waters
--- Trip 5: Cadiz to Barcelona
-(5, 4, 1), -- Spanish Internal Waters
-(5, 5, 2), -- Spanish Territorial Sea
-(5, 6, 3), -- Spanish EEZ
--- removed duplicate (trip_id, jurisdiction_id)=(5,4) which violates primary key
--- Trip 6: Barcelona to Marseille
-(6, 4, 1), -- Spanish Internal Waters
-(6, 5, 2), -- Spanish Territorial Sea
-(6, 12, 3), -- International Waters
-(6, 8, 4), -- French Territorial Sea
-(6, 7, 5), -- French Internal Waters
--- Trip 7: Cascais to Cadiz
-(7, 1, 1), -- Portuguese Internal Waters
-(7, 2, 2), -- Portuguese Territorial Sea
-(7, 3, 3), -- Portuguese EEZ
-(7, 12, 4), -- International Waters
-(7, 6, 5), -- Spanish EEZ
-(7, 5, 6), -- Spanish Territorial Sea
-(7, 4, 7), -- Spanish Internal Waters
--- Trip 8: Marseille to Nice
-(8, 7, 1), -- French Internal Waters
-(8, 8, 2), -- French Territorial Sea
--- Trip 9: Lisbon to Cascais
-(9, 1, 1), -- Portuguese Internal Waters
-(9, 2, 2); -- Portuguese Territorial Sea
+INSERT INTO navigates (
+    country_iso_code, boat_cni, reservation_start_date, reservation_end_date,
+    trip_takeoff_date, trip_arrival_date,
+    jurisdiction_name, jurisdiction_sequence_order
+) VALUES
+-- Trip 1: Lisbon -> Cascais
+('PRT','2020-001','2025-06-01','2025-06-07','2025-06-02','2025-06-02','Portuguese Internal Waters',1),
+('PRT','2020-001','2025-06-01','2025-06-07','2025-06-02','2025-06-02','Portuguese Territorial Sea',2),
+-- Trip 2: Cascais -> Faro
+('PRT','2020-001','2025-06-01','2025-06-07','2025-06-04','2025-06-05','Portuguese Territorial Sea',1),
+('PRT','2020-001','2025-06-01','2025-06-07','2025-06-04','2025-06-05','Portuguese EEZ',2),
+-- Trip 3: Lisbon -> Faro
+('PRT','2019-042','2025-06-15','2025-06-20','2025-06-16','2025-06-17','Portuguese Internal Waters',1),
+('PRT','2019-042','2025-06-15','2025-06-20','2025-06-16','2025-06-17','Portuguese Territorial Sea',2),
+-- Trip 4: Faro -> Cadiz
+('PRT','2021-015','2025-07-01','2025-07-10','2025-07-02','2025-07-04','Portuguese Territorial Sea',1),
+('PRT','2021-015','2025-07-01','2025-07-10','2025-07-02','2025-07-04','Portuguese EEZ',2),
+('PRT','2021-015','2025-07-01','2025-07-10','2025-07-02','2025-07-04','Spanish EEZ',3),
+('PRT','2021-015','2025-07-01','2025-07-10','2025-07-02','2025-07-04','Spanish Territorial Sea',4),
+-- Trip 5: Cadiz -> Barcelona
+('PRT','2021-015','2025-07-01','2025-07-10','2025-07-06','2025-07-08','Spanish Internal Waters',1),
+('PRT','2021-015','2025-07-01','2025-07-10','2025-07-06','2025-07-08','Spanish Territorial Sea',2),
+('PRT','2021-015','2025-07-01','2025-07-10','2025-07-06','2025-07-08','Spanish EEZ',3),
+-- Trip 6: Cadiz -> Barcelona (ESP/2018-123)
+('ESP','2018-123','2025-07-15','2025-07-22','2025-07-16','2025-07-18','Spanish Internal Waters',1),
+('ESP','2018-123','2025-07-15','2025-07-22','2025-07-16','2025-07-18','Spanish Territorial Sea',2),
+-- Trip 7: Barcelona -> Marseille (ESP/2022-056)
+('ESP','2022-056','2025-08-01','2025-08-15','2025-08-03','2025-08-06','Spanish Internal Waters',1),
+('ESP','2022-056','2025-08-01','2025-08-15','2025-08-03','2025-08-06','Spanish Territorial Sea',2),
+('ESP','2022-056','2025-08-01','2025-08-15','2025-08-03','2025-08-06','International Waters',3),
+('ESP','2022-056','2025-08-01','2025-08-15','2025-08-03','2025-08-06','French Territorial Sea',4),
+('ESP','2022-056','2025-08-01','2025-08-15','2025-08-03','2025-08-06','French Internal Waters',5),
+-- Trip 8: Marseille -> Nice (FRA/2020-089)
+('FRA','2020-089','2025-08-20','2025-08-30','2025-08-22','2025-08-24','French Internal Waters',1),
+('FRA','2020-089','2025-08-20','2025-08-30','2025-08-22','2025-08-24','French Territorial Sea',2),
+-- Trip 9: Lisbon -> Cascais (PRT/2020-001 second reservation)
+('PRT','2020-001','2025-09-15','2025-09-22','2025-09-16','2025-09-17','Portuguese Internal Waters',1),
+('PRT','2020-001','2025-09-15','2025-09-22','2025-09-16','2025-09-17','Portuguese Territorial Sea',2);
 
 -- ========================================
--- CERTIFICATIONS
--- IC-4: Skippers need valid certificates (issue_date ≤ trip.takeoff_date ≤ expiry_date) for boat class and jurisdictions
+-- CERTIFICATIONS (PK: sailor_id, issue_date)
 -- ========================================
-INSERT INTO Certification (sailor_id, class_id, issue_date, expiry_date) VALUES
--- Joao Santos (sailor 1) certifications - skippers trips for Class 1 boats
-(1, 1, '2020-01-15', '2026-01-15'),  -- Class 1 ✔
-(1, 2, '2021-03-20', '2027-03-20'),  -- Class 2 ✔
--- Maria Silva (sailor 2) certifications - skippers trips for Class 2 boats
-(2, 1, '2019-05-10', '2025-05-10'),  -- Class 1
-(2, 2, '2020-06-15', '2026-06-15'),  -- Class 2 ✔
-(2, 3, '2021-08-01', '2027-08-01'),  -- Class 3
--- Pedro Santos (sailor 3) certifications - skippers trips for Class 3 boats
-(3, 1, '2018-02-20', '2026-02-20'),  -- Class 1
-(3, 2, '2019-04-10', '2027-04-10'),  -- Class 2
-(3, 3, '2020-07-15', '2028-07-15'),  -- Class 3 ✔
--- Ana Costa (sailor 4, Junior) - no certifications for testing Query D
--- Carlos Ferreira (sailor 5) certifications - skippers trips for Class 2 boats
-(5, 2, '2020-09-05', '2026-09-05'),  -- Class 2 ✔
-(5, 3, '2021-11-12', '2027-11-12'),  -- Class 3
--- Isabel Oliveira (sailor 6, Junior) certifications
-(6, 1, '2023-01-20', '2027-01-20'),  -- Class 1
--- Ricardo Pereira (sailor 7) certifications - skippers trips for Class 4 boats
-(7, 2, '2019-03-15', '2025-03-15'),  -- Class 2
-(7, 3, '2020-05-20', '2026-05-20'),  -- Class 3
-(7, 4, '2021-07-25', '2027-07-25'),  -- Class 4 ✔
--- Sofia Rodrigues (sailor 8, Junior) - no certifications
--- Miguel Alves (sailor 9) certifications - skippers trips for Class 3 boats
-(9, 2, '2020-10-10', '2026-10-10'),  -- Class 2
-(9, 3, '2021-12-15', '2027-12-15'),  -- Class 3 ✔
--- Beatriz Santos (sailor 10, Junior) - has certification but not for Class 3 (for Query D)
-(10, 1, '2024-01-10', '2028-01-10'), -- Class 1
--- Fernando Gomes (sailor 11) certifications
-(11, 1, '2019-06-20', '2025-06-20'), -- Class 1
-(11, 2, '2020-08-25', '2026-08-25'), -- Class 2
--- Lucia Martins (sailor 12, Junior) - no certifications
-(12, 1, '2023-11-15', '2027-11-15'); -- Class 1
+INSERT INTO Certification (sailor_id, issue_date, expiry_date) VALUES
+(1, '2020-01-15', '2026-01-15'),
+(1, '2021-03-20', '2027-03-20'),
+(2, '2019-05-10', '2025-05-10'),
+(2, '2020-06-15', '2026-06-15'),
+(2, '2021-08-01', '2027-08-01'),
+(3, '2018-02-20', '2026-02-20'),
+(3, '2019-04-10', '2027-04-10'),
+(3, '2020-07-15', '2028-07-15'),
+(5, '2020-09-05', '2026-09-05'),
+(5, '2021-11-12', '2027-11-12'),
+(6, '2023-01-20', '2027-01-20'),
+(7, '2019-03-15', '2025-03-15'),
+(7, '2020-05-20', '2026-05-20'),
+(7, '2021-07-25', '2027-07-25'),
+(9, '2020-10-10', '2026-10-10'),
+(9, '2021-12-15', '2027-12-15'),
+(10,'2024-01-10', '2028-01-10'),
+(11,'2019-06-20', '2025-06-20'),
+(11,'2020-08-25', '2026-08-25'),
+(12,'2023-11-15', '2027-11-15');
 
 -- ========================================
--- VALID_IN (Certification ↔ Country M:N)
+-- CERTIFIES_FOR (Certification  Boat_Class)
 -- ========================================
-INSERT INTO valid_in (certification_id, iso_code) VALUES
--- Joao Santos certifications
-(1, 'PRT'),
-(1, 'ESP'),
-(2, 'PRT'),
-(2, 'ESP'),
-(2, 'FRA'),
--- Maria Silva certifications
-(3, 'PRT'),
-(4, 'PRT'),
-(4, 'ESP'),
-(5, 'PRT'),
-(5, 'ESP'),
-(5, 'FRA'),
--- Pedro Santos certifications
-(6, 'PRT'),
-(6, 'ESP'),
-(7, 'PRT'),
-(7, 'ESP'),
-(8, 'PRT'),
-(8, 'ESP'),
-(8, 'FRA'),
--- Carlos Ferreira certifications
-(9, 'ESP'),
-(9, 'FRA'),
-(10, 'ESP'),
-(10, 'FRA'),
-(10, 'ITA'),
--- Isabel Oliveira certifications
-(11, 'PRT'),
--- Ricardo Pereira certifications
-(12, 'ESP'),
-(13, 'ESP'),
-(13, 'FRA'),
-(14, 'ESP'),
-(14, 'FRA'),
--- Miguel Alves certifications
-(15, 'FRA'),
-(16, 'FRA'),
-(16, 'ITA'),
--- Beatriz Santos certifications
-(17, 'PRT'),
--- Fernando Gomes certifications
-(18, 'ITA'),
-(19, 'ITA'),
--- Lucia Martins certifications
-(20, 'BRA');
+INSERT INTO certifies_for (sailor_id, certification_issue_date, class_name) VALUES
+-- Joao (sailor 1)
+(1,'2020-01-15','Class 1'),
+(1,'2021-03-20','Class 2'),
+-- Maria (sailor 2)
+(2,'2019-05-10','Class 1'),
+(2,'2020-06-15','Class 2'),
+(2,'2021-08-01','Class 3'),
+-- Pedro (sailor 3)
+(3,'2018-02-20','Class 1'),
+(3,'2019-04-10','Class 2'),
+(3,'2020-07-15','Class 3'),
+-- Carlos (sailor 5)
+(5,'2020-09-05','Class 2'),
+(5,'2021-11-12','Class 3'),
+-- Isabel (sailor 6)
+(6,'2023-01-20','Class 1'),
+-- Ricardo (sailor 7)
+(7,'2019-03-15','Class 2'),
+(7,'2020-05-20','Class 3'),
+(7,'2021-07-25','Class 4'),
+-- Miguel (sailor 9)
+(9,'2020-10-10','Class 2'),
+(9,'2021-12-15','Class 3'),
+-- Beatriz (sailor 10)
+(10,'2024-01-10','Class 1'),
+-- Fernando (sailor 11)
+(11,'2019-06-20','Class 1'),
+(11,'2020-08-25','Class 2'),
+-- Lucia (sailor 12)
+(12,'2023-11-15','Class 1');
+
+-- ========================================
+-- VALID_IN (Certification  Jurisdiction)
+-- ========================================
+INSERT INTO valid_in (sailor_id, certification_issue_date, jurisdiction_name) VALUES
+-- Joao
+(1,'2020-01-15','Portuguese Internal Waters'),
+(1,'2020-01-15','Spanish Internal Waters'),
+(1,'2021-03-20','Portuguese Internal Waters'),
+(1,'2021-03-20','Spanish Internal Waters'),
+(1,'2021-03-20','French Internal Waters'),
+-- Maria
+(2,'2019-05-10','Portuguese Internal Waters'),
+(2,'2020-06-15','Portuguese Internal Waters'),
+(2,'2020-06-15','Spanish Internal Waters'),
+(2,'2021-08-01','Portuguese Internal Waters'),
+(2,'2021-08-01','Spanish Internal Waters'),
+(2,'2021-08-01','French Internal Waters'),
+-- Pedro
+(3,'2018-02-20','Portuguese Internal Waters'),
+(3,'2018-02-20','Spanish Internal Waters'),
+(3,'2019-04-10','Portuguese Internal Waters'),
+(3,'2019-04-10','Spanish Internal Waters'),
+(3,'2020-07-15','Portuguese Internal Waters'),
+(3,'2020-07-15','Spanish Internal Waters'),
+(3,'2020-07-15','French Internal Waters'),
+-- Carlos
+(5,'2020-09-05','Spanish Internal Waters'),
+(5,'2021-11-12','Spanish Internal Waters'),
+(5,'2021-11-12','French Internal Waters'),
+-- Isabel
+(6,'2023-01-20','Portuguese Internal Waters'),
+-- Ricardo
+(7,'2019-03-15','Spanish Internal Waters'),
+(7,'2020-05-20','Spanish Internal Waters'),
+(7,'2020-05-20','French Internal Waters'),
+(7,'2021-07-25','Spanish Internal Waters'),
+(7,'2021-07-25','French Internal Waters'),
+-- Miguel
+(9,'2020-10-10','French Internal Waters'),
+(9,'2021-12-15','French Internal Waters'),
+-- Beatriz
+(10,'2024-01-10','Portuguese Internal Waters'),
+-- Fernando
+(11,'2019-06-20','Italian Internal Waters'),
+(11,'2020-08-25','Italian Internal Waters'),
+-- Lucia
+(12,'2023-11-15','Brazilian Internal Waters');
+
+-- ========================================
+-- IC VIOLATION EXAMPLES (INTENTIONALLY BREAKING COMMENTED IC'S)
+-- These rows rely only on currently unenforced ICs. Existing CHECK/FK constraints still hold.
+-- ========================================
+
+-- IC-1: Country registers boats but has no location defined.
+INSERT INTO Country (iso_code, name, flag) VALUES
+('NOR', 'Norway', 'https://example.com/countries/norway_flag.jpg');
+INSERT INTO Boat (cni, country_iso_code, class_name, name, length, registration_year, picture) VALUES
+('2024-321', 'NOR', 'Class 1', 'No Harbor', 12.00, 2024, 'https://example.com/boats/no-harbor.jpg');
+-- Example that would satisfy IC-1 (provide at least one location for NOR):
+-- INSERT INTO Location (latitude, longitude, name) VALUES (59.909444, 10.734000, 'Oslo Harbor');
+-- INSERT INTO has_location (country_iso_code, location_latitude, location_longitude) VALUES ('NOR', 59.909444, 10.734000);
+
+-- IC-3: Two locations closer than 1 nautical mile (not enforced here).
+INSERT INTO Location (latitude, longitude, name) VALUES
+(38.706900, -9.135200, 'Near Lisbon Marina');
+INSERT INTO has_location (country_iso_code, location_latitude, location_longitude) VALUES
+('PRT', 38.706900, -9.135200);
+
+-- IC-5: Boat longer than its class allows (Class 1 max 15.00).
+INSERT INTO Boat (cni, country_iso_code, class_name, name, length, registration_year, picture) VALUES
+('2017-999', 'PRT', 'Class 1', 'Too Long', 20.00, 2017, 'https://example.com/boats/too-long.jpg');
+
+-- IC-7: Same sailor appears in both Senior and Junior.
+INSERT INTO Sailor (first_name, surname, email) VALUES
+('Dual', 'Role', 'dual.role@email.com');
+INSERT INTO Senior (senior_id)
+SELECT id FROM Sailor WHERE email = 'dual.role@email.com';
+INSERT INTO Junior (junior_id)
+SELECT id FROM Sailor WHERE email = 'dual.role@email.com';
+
+-- IC-9: Overlapping reservations for the same boat.
+INSERT INTO Reservation (country_iso_code, boat_cni, start_date, end_date, responsible_for_sailor_id) VALUES
+('PRT', '2020-001', '2025-06-03', '2025-06-06', 1); -- overlaps existing 2025-06-01..07
+INSERT INTO authorized (country_iso_code, boat_cni, reservation_start_date, reservation_end_date, sailor_id) VALUES
+('PRT','2020-001','2025-06-03','2025-06-06',1);
+
+-- IC-10: Reservation without any authorized sailors.
+INSERT INTO Reservation (country_iso_code, boat_cni, start_date, end_date, responsible_for_sailor_id) VALUES
+('ESP', '2018-123', '2025-07-18', '2025-07-19', 5); -- no authorized entry on purpose
+-- Example that would satisfy IC-10 if uncommented:
+-- INSERT INTO authorized (country_iso_code, boat_cni, reservation_start_date, reservation_end_date, sailor_id) VALUES
+-- ('ESP','2018-123','2025-07-18','2025-07-19',5);
+
+-- IC-11: Trip skipper not in authorized list.
+INSERT INTO Reservation (country_iso_code, boat_cni, start_date, end_date, responsible_for_sailor_id) VALUES
+('PRT', '2019-042', '2025-11-01', '2025-11-05', 2);
+INSERT INTO authorized (country_iso_code, boat_cni, reservation_start_date, reservation_end_date, sailor_id) VALUES
+('PRT','2019-042','2025-11-01','2025-11-05',4),
+('PRT','2019-042','2025-11-01','2025-11-05',5);
+INSERT INTO Trip (
+    country_iso_code, boat_cni, reservation_start_date, reservation_end_date,
+    takeoff_date, arrival_date, insurance_reference,
+    starts_at_latitude, starts_at_longitude,
+    ends_at_latitude,   ends_at_longitude,
+    skippers_id
+) VALUES
+('PRT','2019-042','2025-11-01','2025-11-05','2025-11-02','2025-11-03','INS-VIOL-011',
+ 38.706944,-9.135278, 37.019167,-7.930833, 1); -- skipper 1 not authorized for this reservation
+-- Example that would satisfy IC-11 (authorize skipper 1):
+-- INSERT INTO authorized (country_iso_code, boat_cni, reservation_start_date, reservation_end_date, sailor_id) VALUES
+-- ('PRT','2019-042','2025-11-01','2025-11-05',1);
+
+-- IC-12: Skipper lacks required certificate for boat class/jurisdiction.
+INSERT INTO Reservation (country_iso_code, boat_cni, start_date, end_date, responsible_for_sailor_id) VALUES
+('ESP', '2022-056', '2025-11-10', '2025-11-14', 7);
+INSERT INTO authorized (country_iso_code, boat_cni, reservation_start_date, reservation_end_date, sailor_id) VALUES
+('ESP','2022-056','2025-11-10','2025-11-14',6);
+INSERT INTO Trip (
+    country_iso_code, boat_cni, reservation_start_date, reservation_end_date,
+    takeoff_date, arrival_date, insurance_reference,
+    starts_at_latitude, starts_at_longitude,
+    ends_at_latitude,   ends_at_longitude,
+    skippers_id
+) VALUES
+('ESP','2022-056','2025-11-10','2025-11-14','2025-11-11','2025-11-12','INS-VIOL-012',
+ 41.375833, 2.183056, 43.296389, 5.369722, 6); -- sailor 6 only certified for Class 1
+-- Example that would satisfy IC-12 (give skipper 6 a valid Class 4 cert during the trip):
+-- INSERT INTO Certification (sailor_id, issue_date, expiry_date) VALUES
+-- (6, '2025-01-01', '2026-01-01');
+-- INSERT INTO certifies_for (sailor_id, certification_issue_date, class_name) VALUES
+-- (6, '2025-01-01', 'Class 4');
+-- INSERT INTO valid_in (sailor_id, certification_issue_date, jurisdiction_name) VALUES
+-- (6, '2025-01-01', 'Spanish Internal Waters'),
+-- (6, '2025-01-01', 'French Internal Waters');
+
+-- IC-15: Overlapping trips within the same reservation.
+INSERT INTO Reservation (country_iso_code, boat_cni, start_date, end_date, responsible_for_sailor_id) VALUES
+('FRA', '2020-089', '2025-09-01', '2025-09-10', 9);
+INSERT INTO authorized (country_iso_code, boat_cni, reservation_start_date, reservation_end_date, sailor_id) VALUES
+('FRA','2020-089','2025-09-01','2025-09-10',9);
+INSERT INTO Trip (
+    country_iso_code, boat_cni, reservation_start_date, reservation_end_date,
+    takeoff_date, arrival_date, insurance_reference,
+    starts_at_latitude, starts_at_longitude,
+    ends_at_latitude,   ends_at_longitude,
+    skippers_id
+) VALUES
+('FRA','2020-089','2025-09-01','2025-09-10','2025-09-02','2025-09-05','INS-VIOL-015A',
+ 43.296389, 5.369722, 43.695556, 7.282222, 9),
+('FRA','2020-089','2025-09-01','2025-09-10','2025-09-04','2025-09-07','INS-VIOL-015B',
+ 43.695556, 7.282222, 43.296389, 5.369722, 9); -- overlaps with previous trip
+
+-- IC-16: Trip without navigates entry.
+INSERT INTO Reservation (country_iso_code, boat_cni, start_date, end_date, responsible_for_sailor_id) VALUES
+('BRA', '2020-444', '2025-12-01', '2025-12-05', 11);
+INSERT INTO authorized (country_iso_code, boat_cni, reservation_start_date, reservation_end_date, sailor_id) VALUES
+('BRA','2020-444','2025-12-01','2025-12-05',11);
+INSERT INTO Trip (
+    country_iso_code, boat_cni, reservation_start_date, reservation_end_date,
+    takeoff_date, arrival_date, insurance_reference,
+    starts_at_latitude, starts_at_longitude,
+    ends_at_latitude,   ends_at_longitude,
+    skippers_id
+) VALUES
+('BRA','2020-444','2025-12-01','2025-12-05','2025-12-02','2025-12-03','INS-VIOL-016',
+ -22.968333,-43.173056, -22.968333,-43.173056, 11); -- no navigates row on purpose
+-- Example that would satisfy IC-16 if uncommented:
+-- INSERT INTO navigates (
+--     country_iso_code, boat_cni, reservation_start_date, reservation_end_date,
+--     trip_takeoff_date, trip_arrival_date,
+--     jurisdiction_name, jurisdiction_sequence_order
+-- ) VALUES
+-- ('BRA','2020-444','2025-12-01','2025-12-05','2025-12-02','2025-12-03','Brazilian Internal Waters',1);
+
+-- IC-18: Certification missing valid_in and certifies_for associations.
+INSERT INTO Certification (sailor_id, issue_date, expiry_date) VALUES
+(8, '2025-01-01', '2026-01-01');
+-- Examples that would satisfy IC-18 if uncommented:
+-- INSERT INTO valid_in (sailor_id, certification_issue_date, jurisdiction_name) VALUES
+-- (8,'2025-01-01','Portuguese Internal Waters');
+-- INSERT INTO certifies_for (sailor_id, certification_issue_date, class_name) VALUES
+-- (8,'2025-01-01','Class 1');
+
+-- ========================================
+-- Enforced ICs (would error if uncommented) — shown for reference only
+-- IC-2: International Waters must have iso_code NULL (CHECK enforced)
+-- INSERT INTO administers (country_iso_code, jurisdiction_name) VALUES ('PRT', 'International Waters');
+-- IC-4: Boat_Class.max_length must be positive (CHECK enforced)
+-- INSERT INTO Boat_Class (name, max_length) VALUES ('Bad Class', -1);
+-- IC-6: Boat.length must be positive (CHECK enforced)
+-- INSERT INTO Boat (cni, country_iso_code, class_name, name, length, registration_year, picture) VALUES ('BAD-LEN', 'PRT', 'Class 1', 'Bad Length', -5, 2024, 'x');
+-- IC-8: Reservation end_date >= start_date (CHECK enforced)
+-- INSERT INTO Reservation (country_iso_code, boat_cni, start_date, end_date, responsible_for_sailor_id) VALUES ('PRT','2020-001','2025-05-10','2025-05-01',1);
+-- IC-13: Trip arrival_date >= takeoff_date (CHECK enforced)
+-- INSERT INTO Trip (country_iso_code, boat_cni, reservation_start_date, reservation_end_date, takeoff_date, arrival_date, insurance_reference, starts_at_latitude, starts_at_longitude, ends_at_latitude, ends_at_longitude, skippers_id) VALUES ('PRT','2020-001','2025-06-01','2025-06-07','2025-06-05','2025-06-04','INS-BAD-13',38.706944,-9.135278,38.697222,-9.420833,1);
+-- IC-14: Trip dates within reservation window (CHECK enforced)
+-- INSERT INTO Trip (country_iso_code, boat_cni, reservation_start_date, reservation_end_date, takeoff_date, arrival_date, insurance_reference, starts_at_latitude, starts_at_longitude, ends_at_latitude, ends_at_longitude, skippers_id) VALUES ('PRT','2020-001','2025-06-01','2025-06-07','2025-05-31','2025-06-02','INS-BAD-14',38.706944,-9.135278,38.697222,-9.420833,1);
+-- IC-17: navigates.jurisdiction_sequence_order > 0 (CHECK enforced)
+-- INSERT INTO navigates (country_iso_code, boat_cni, reservation_start_date, reservation_end_date, trip_takeoff_date, trip_arrival_date, jurisdiction_name, jurisdiction_sequence_order) VALUES ('PRT','2020-001','2025-06-01','2025-06-07','2025-06-02','2025-06-02','Portuguese Internal Waters',0);
+-- IC-19: Certification expiry_date > issue_date (CHECK enforced)
+-- INSERT INTO Certification (sailor_id, issue_date, expiry_date) VALUES (1,'2025-01-10','2025-01-05');

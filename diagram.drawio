@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36" version="29.2.3">
   <diagram id="diagram1" name="E-A Chen Diagram">
-    <mxGraphModel dx="3691" dy="1110" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="3332" dy="914" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -202,8 +202,8 @@
         <mxCell id="CDsFOK5z8vJn7LcX807Z-25" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=11;" value="belongs_to" vertex="1">
           <mxGeometry height="30" width="60" x="-1267" y="554" as="geometry" />
         </mxCell>
-        <mxCell id="CDsFOK5z8vJn7LcX807Z-26" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=top;rounded=0;" value="&lt;b&gt;&lt;font style=&quot;font-size: 15px;&quot;&gt;Integrity Constrains:&lt;/font&gt;&lt;/b&gt;&lt;div&gt;&lt;font style=&quot;font-size: 15px;&quot;&gt;IC-1: Boat length must not exceed the maximum lenght of its class&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;&quot;&gt;&lt;span style=&quot;font-size: 15px;&quot;&gt;IC-2:&amp;nbsp;&lt;/span&gt;&lt;span&gt;&lt;font face=&quot;Helvetica&quot; style=&quot;color: light-dark(rgb(0, 0, 0), rgb(255, 253, 253)); font-size: 15px;&quot;&gt;Any two Location points must be at least 1 nautical mile apart&lt;/font&gt;&lt;/span&gt;&lt;br&gt;&lt;span style=&quot;font-size: 15px;&quot;&gt;IC-3: Skipper must be an authorized sailor for the reservation&lt;/span&gt;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;&quot;&gt;&lt;span style=&quot;font-size: 15px;&quot;&gt;IC-4:&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;white-space-collapse: preserve;&quot;&gt;&lt;font style=&quot;color: light-dark(rgb(0, 0, 0), rgb(255, 253, 253)); font-size: 15px;&quot; face=&quot;Helvetica&quot;&gt;Skipper must hold valid cert. for boat_class &amp;amp; jurisdictions &lt;/font&gt;&lt;/span&gt;&lt;span style=&quot;font-size: 15px;&quot;&gt;in the time interval of the trip&lt;/span&gt;&lt;span style=&quot;font-size: 15px;&quot;&gt;&lt;br&gt;IC-5: &lt;span style=&quot;background-color: light-dark(#ffffff, var(--ge-dark-color, #121212));&quot;&gt;T&lt;/span&gt;&lt;/span&gt;&lt;/font&gt;&lt;span style=&quot;background-color: light-dark(#ffffff, var(--ge-dark-color, #121212));&quot;&gt;&lt;font style=&quot;color: light-dark(rgb(0, 0, 0), rgb(255, 253, 253)); font-size: 15px;&quot; face=&quot;Helvetica&quot;&gt;rip takeoff/arrival dates must lie within its Reservation start_date, end_date&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: light-dark(#ffffff, var(--ge-dark-color, #121212));&quot;&gt;&lt;font style=&quot;color: light-dark(rgb(0, 0, 0), rgb(255, 253, 253)); font-size: 15px;&quot; face=&quot;Helvetica&quot;&gt;IC-6: Every country that registers a boat needs to have at least 1 location defined&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 15px;&quot;&gt;IC-7: end_date, arrival_date and expiry_date must be later than start_date, takeoff_date, and issue_date, respectively&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font&gt;&lt;br&gt;&lt;/font&gt;&lt;/div&gt;" vertex="1">
-          <mxGeometry height="215" width="450" x="-472" y="736" as="geometry" />
+        <mxCell id="CDsFOK5z8vJn7LcX807Z-26" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=top;rounded=0;" value="&lt;div&gt;&lt;font style=&quot;font-size: 15px;&quot;&gt;&lt;div style=&quot;&quot;&gt;&lt;b&gt;IC-1&lt;/b&gt;:&lt;b&gt; &lt;/b&gt;Country that registers boats must have at least one Location.&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&lt;b&gt;IC-2&lt;/b&gt;: Distinct Location points must be at least 1 nautical mile apart.&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&lt;b&gt;IC-3&lt;/b&gt;: Boat Class max_length must be positive.&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&lt;b&gt;IC-4&lt;/b&gt;: Boat length must not exceed its Boat Class max_length.&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&lt;b&gt;IC-5&lt;/b&gt;: Boat length must be positive.&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&lt;b&gt;IC-6&lt;/b&gt;: Reservation end_date must be &amp;gt;= Reservation start_date.&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&lt;b&gt;IC-7&lt;/b&gt;: A given Boat cannot have overlapping Reservations.&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&lt;b&gt;IC-8&lt;/b&gt;: Skipper must be among the authorized sailors for that Reservation.&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&lt;b&gt;IC-9&lt;/b&gt;: Skipper must hold Certification(s) that certify for the Boat class and are valid in navigated jurisdictions at a specific trip time interval.&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&lt;b&gt;IC-10&lt;/b&gt;:&lt;b&gt; &lt;/b&gt;Trip arrival_date must be &amp;gt;= Trip takeoff_date.&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&lt;b&gt;IC-11&lt;/b&gt;: Trip dates must lie within their Reservation start/end dates.&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&lt;b&gt;IC-12&lt;/b&gt;: Trips within the same Reservation must not overlap in time.&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&lt;b&gt;IC-13&lt;/b&gt;: sequence_order must be positive.&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&lt;b&gt;IC-14&lt;/b&gt;: expiry_date must be &amp;gt; issue_date.&lt;/div&gt;&lt;/font&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="336" width="450" x="-460" y="803" as="geometry" />
         </mxCell>
         <mxCell id="CDsFOK5z8vJn7LcX807Z-27" edge="1" parent="1" source="8r8mc34tsR1iCPQRsbQ5-7" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;shape=flexArrow;endSize=1.9307692307692306;startSize=3;width=5;endWidth=1.923076923076923;" target="rel_belongs_class" value="">
           <mxGeometry height="50" relative="1" width="50" as="geometry">
@@ -216,9 +216,6 @@
             <mxPoint x="-992" y="498" as="sourcePoint" />
             <mxPoint x="-942" y="448" as="targetPoint" />
           </mxGeometry>
-        </mxCell>
-        <mxCell id="CDsFOK5z8vJn7LcX807Z-29" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontColor=light-dark(#000000,#FF3535);" value="&lt;font style=&quot;font-size: 8px;&quot;&gt;(IC-1)&lt;/font&gt;" vertex="1">
-          <mxGeometry height="22" width="48" x="-1300" y="504" as="geometry" />
         </mxCell>
         <mxCell id="CDsFOK5z8vJn7LcX807Z-30" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="&lt;u&gt;name&lt;/u&gt;" vertex="1">
           <mxGeometry height="26" width="40" x="-1354" y="277" as="geometry" />
@@ -526,9 +523,6 @@
         <mxCell id="CDsFOK5z8vJn7LcX807Z-200" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=11;" value="responsable_for" vertex="1">
           <mxGeometry height="30" width="60" x="-1142" y="750" as="geometry" />
         </mxCell>
-        <mxCell id="CDsFOK5z8vJn7LcX807Z-201" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontColor=light-dark(#000000,#FF3535);" value="&lt;font style=&quot;font-size: 8px;&quot;&gt;(IC-2)&lt;/font&gt;" vertex="1">
-          <mxGeometry height="30" width="60" x="-922" y="88" as="geometry" />
-        </mxCell>
         <mxCell id="A2drWbCiLtWDng1JCRdC-13" edge="1" parent="1" source="CDsFOK5z8vJn7LcX807Z-195" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;" target="A2drWbCiLtWDng1JCRdC-8" value="">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
@@ -538,11 +532,8 @@
             <mxPoint x="-1062" y="783" as="sourcePoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="CDsFOK5z8vJn7LcX807Z-205" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontColor=light-dark(#000000,#FF3535);" value="&lt;font style=&quot;font-size: 8px;&quot;&gt;(IC-3)&lt;/font&gt;" vertex="1">
-          <mxGeometry height="30" width="60" x="-933" y="866" as="geometry" />
-        </mxCell>
-        <mxCell id="CDsFOK5z8vJn7LcX807Z-206" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontColor=light-dark(#000000,#FF3535);" value="&lt;font style=&quot;font-size: 8px;&quot;&gt;(IC-4)&lt;/font&gt;" vertex="1">
-          <mxGeometry height="30" width="60" x="-887" y="866" as="geometry" />
+        <mxCell id="CDsFOK5z8vJn7LcX807Z-206" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontColor=light-dark(#000000,#FF3535);" value="&lt;font style=&quot;font-size: 8px;&quot;&gt;(IC-1)&lt;/font&gt;" vertex="1">
+          <mxGeometry height="30" width="60" x="-1422" y="94" as="geometry" />
         </mxCell>
         <mxCell id="CDsFOK5z8vJn7LcX807Z-209" edge="1" parent="1" source="9xOrG4ALa-P6lgMfHXvc-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;shape=link;width=5;" target="CDsFOK5z8vJn7LcX807Z-189" value="">
           <mxGeometry relative="1" as="geometry">
@@ -562,9 +553,6 @@
         </mxCell>
         <mxCell id="CDsFOK5z8vJn7LcX807Z-212" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="sequence_ordder" vertex="1">
           <mxGeometry height="36" width="108" x="-760" y="784" as="geometry" />
-        </mxCell>
-        <mxCell id="4ND26QEYgpiQ4FIP_4ly-6" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontColor=light-dark(#000000,#FF3535);" value="&lt;span style=&quot;font-size: 8px;&quot;&gt;(IC-5&lt;/span&gt;&lt;span style=&quot;font-size: 8px; background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 53, 53));&quot;&gt;)&lt;/span&gt;" vertex="1">
-          <mxGeometry height="30" width="60" x="-1240" y="815" as="geometry" />
         </mxCell>
         <mxCell id="A2drWbCiLtWDng1JCRdC-1" parent="1" style="triangle;whiteSpace=wrap;html=1;rotation=-90;" value="" vertex="1">
           <mxGeometry height="40" width="30" x="-979" y="733" as="geometry" />
@@ -672,18 +660,6 @@
             <mxPoint x="-780.4100000000001" y="490.4100000000001" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="9xOrG4ALa-P6lgMfHXvc-8" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontColor=light-dark(#000000,#FF3535);" value="&lt;span style=&quot;font-size: 8px;&quot;&gt;(IC-7&lt;/span&gt;&lt;span style=&quot;font-size: 8px; background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 53, 53));&quot;&gt;)&lt;/span&gt;" vertex="1">
-          <mxGeometry height="30" width="60" x="-1240" y="803" as="geometry" />
-        </mxCell>
-        <mxCell id="9xOrG4ALa-P6lgMfHXvc-9" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontColor=light-dark(#000000,#FF3535);" value="&lt;span style=&quot;font-size: 8px;&quot;&gt;(IC-7&lt;/span&gt;&lt;span style=&quot;font-size: 8px; background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 53, 53));&quot;&gt;)&lt;/span&gt;" vertex="1">
-          <mxGeometry height="30" width="60" x="-1317" y="603" as="geometry" />
-        </mxCell>
-        <mxCell id="9xOrG4ALa-P6lgMfHXvc-10" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontColor=light-dark(#000000,#FF3535);" value="&lt;span style=&quot;font-size: 8px;&quot;&gt;(IC-7&lt;/span&gt;&lt;span style=&quot;font-size: 8px; background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 53, 53));&quot;&gt;)&lt;/span&gt;" vertex="1">
-          <mxGeometry height="30" width="60" x="-794.5" y="440.5" as="geometry" />
-        </mxCell>
-        <mxCell id="9xOrG4ALa-P6lgMfHXvc-11" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontColor=light-dark(#000000,#FF3535);" value="&lt;span style=&quot;font-size: 8px;&quot;&gt;(IC-6&lt;/span&gt;&lt;span style=&quot;font-size: 8px; background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 53, 53));&quot;&gt;)&lt;/span&gt;" vertex="1">
-          <mxGeometry height="30" width="60" x="-1422" y="90.5" as="geometry" />
-        </mxCell>
         <mxCell id="r-j9CQ6_af8cw0nMq4Eg-1" parent="1" style="rhombus;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=none;" value="" vertex="1">
           <mxGeometry height="51" width="52" x="-790.5" y="669.5" as="geometry" />
         </mxCell>
@@ -698,6 +674,45 @@
         </mxCell>
         <mxCell id="8r8mc34tsR1iCPQRsbQ5-10" parent="1" style="rhombus;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=none;" value="" vertex="1">
           <mxGeometry height="51" width="52" x="-1578" y="208.5" as="geometry" />
+        </mxCell>
+        <mxCell id="8r8mc34tsR1iCPQRsbQ5-12" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontColor=light-dark(#000000,#FF3535);" value="&lt;font style=&quot;font-size: 8px;&quot;&gt;(IC-2)&lt;/font&gt;" vertex="1">
+          <mxGeometry height="30" width="60" x="-917" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="8r8mc34tsR1iCPQRsbQ5-13" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontColor=light-dark(#000000,#FF3535);" value="&lt;font style=&quot;font-size: 8px;&quot;&gt;(IC-3)&lt;/font&gt;" vertex="1">
+          <mxGeometry height="30" width="60" x="-1055.5" y="445" as="geometry" />
+        </mxCell>
+        <mxCell id="8r8mc34tsR1iCPQRsbQ5-14" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontColor=light-dark(#000000,#FF3535);" value="&lt;font style=&quot;font-size: 8px;&quot;&gt;(IC-4)&lt;/font&gt;" vertex="1">
+          <mxGeometry height="30" width="60" x="-1441" y="434" as="geometry" />
+        </mxCell>
+        <mxCell id="8r8mc34tsR1iCPQRsbQ5-15" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontColor=light-dark(#000000,#FF3535);" value="&lt;font style=&quot;font-size: 8px;&quot;&gt;(IC-5)&lt;/font&gt;" vertex="1">
+          <mxGeometry height="30" width="60" x="-1441" y="445" as="geometry" />
+        </mxCell>
+        <mxCell id="8r8mc34tsR1iCPQRsbQ5-16" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontColor=light-dark(#000000,#FF3535);" value="&lt;font style=&quot;font-size: 8px;&quot;&gt;(IC-6)&lt;/font&gt;" vertex="1">
+          <mxGeometry height="30" width="60" x="-1312" y="601.5" as="geometry" />
+        </mxCell>
+        <mxCell id="8r8mc34tsR1iCPQRsbQ5-17" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontColor=light-dark(#000000,#FF3535);" value="&lt;font style=&quot;font-size: 8px;&quot;&gt;(IC-7)&lt;/font&gt;" vertex="1">
+          <mxGeometry height="30" width="60" x="-1408" y="571.5" as="geometry" />
+        </mxCell>
+        <mxCell id="8r8mc34tsR1iCPQRsbQ5-18" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontColor=light-dark(#000000,#FF3535);" value="&lt;font style=&quot;font-size: 8px;&quot;&gt;(IC-8)&lt;/font&gt;" vertex="1">
+          <mxGeometry height="30" width="60" x="-887" y="866" as="geometry" />
+        </mxCell>
+        <mxCell id="8r8mc34tsR1iCPQRsbQ5-19" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontColor=light-dark(#000000,#FF3535);" value="&lt;font style=&quot;font-size: 8px;&quot;&gt;(IC-9)&lt;/font&gt;" vertex="1">
+          <mxGeometry height="30" width="60" x="-933" y="904" as="geometry" />
+        </mxCell>
+        <mxCell id="8r8mc34tsR1iCPQRsbQ5-20" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontColor=light-dark(#000000,#FF3535);" value="&lt;font style=&quot;font-size: 8px;&quot;&gt;(IC-10)&lt;/font&gt;" vertex="1">
+          <mxGeometry height="30" width="60" x="-1232" y="815" as="geometry" />
+        </mxCell>
+        <mxCell id="8r8mc34tsR1iCPQRsbQ5-21" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontColor=light-dark(#000000,#FF3535);" value="&lt;font style=&quot;font-size: 8px;&quot;&gt;(IC-11)&lt;/font&gt;" vertex="1">
+          <mxGeometry height="30" width="60" x="-1322" y="750" as="geometry" />
+        </mxCell>
+        <mxCell id="8r8mc34tsR1iCPQRsbQ5-22" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontColor=light-dark(#000000,#FF3535);" value="&lt;font style=&quot;font-size: 8px;&quot;&gt;(IC-12)&lt;/font&gt;" vertex="1">
+          <mxGeometry height="30" width="60" x="-1381" y="750" as="geometry" />
+        </mxCell>
+        <mxCell id="8r8mc34tsR1iCPQRsbQ5-23" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontColor=light-dark(#000000,#FF3535);" value="&lt;font style=&quot;font-size: 8px;&quot;&gt;(IC-13)&lt;/font&gt;" vertex="1">
+          <mxGeometry height="30" width="60" x="-695" y="762" as="geometry" />
+        </mxCell>
+        <mxCell id="8r8mc34tsR1iCPQRsbQ5-24" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontColor=light-dark(#000000,#FF3535);" value="&lt;font style=&quot;font-size: 8px;&quot;&gt;(IC-14)&lt;/font&gt;" vertex="1">
+          <mxGeometry height="30" width="60" x="-798.5" y="445" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
