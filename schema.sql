@@ -5,20 +5,24 @@
 -- ========================================
 
 -- Drop existing tables if they exist
-DROP TABLE IF EXISTS navigates CASCADE;
-DROP TABLE IF EXISTS Trip CASCADE;
-DROP TABLE IF EXISTS valid_in CASCADE;
-DROP TABLE IF EXISTS Certification CASCADE;
-DROP TABLE IF EXISTS authorized CASCADE;
-DROP TABLE IF EXISTS Reservation CASCADE;
-DROP TABLE IF EXISTS Senior CASCADE;
-DROP TABLE IF EXISTS Junior CASCADE;
-DROP TABLE IF EXISTS Sailor CASCADE;
-DROP TABLE IF EXISTS Boat CASCADE;
-DROP TABLE IF EXISTS Boat_Class CASCADE;
-DROP TABLE IF EXISTS Location CASCADE;
-DROP TABLE IF EXISTS Jurisdiction CASCADE;
-DROP TABLE IF EXISTS Country CASCADE;
+-- This avoids accidentally removing dependent objects in production.
+DROP TABLE IF EXISTS navigates;
+DROP TABLE IF EXISTS certifies_for;
+DROP TABLE IF EXISTS valid_in;
+DROP TABLE IF EXISTS Trip;
+DROP TABLE IF EXISTS authorized;
+DROP TABLE IF EXISTS Reservation;
+DROP TABLE IF EXISTS Certification;
+DROP TABLE IF EXISTS Senior;
+DROP TABLE IF EXISTS Junior;
+DROP TABLE IF EXISTS Sailor;
+DROP TABLE IF EXISTS has_location;
+DROP TABLE IF EXISTS Location;
+DROP TABLE IF EXISTS administers;
+DROP TABLE IF EXISTS Jurisdiction;
+DROP TABLE IF EXISTS Boat;
+DROP TABLE IF EXISTS Boat_Class;
+DROP TABLE IF EXISTS Country;
 
 -- ========================================
 -- COUNTRY

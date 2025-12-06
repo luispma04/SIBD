@@ -1,52 +1,33 @@
-=========================================
-QUERY A: The name of all boats that are used in some trip
-=========================================
+In this .txt all the text after "--" was added after as comments. Output of the queries:
 
-         name         
-----------------------
+        name        
+--------------------
  Atlantic Dream
+ Costa Brava
  Cote d Azur
  Mediterranean Star
  Ocean Explorer
  Sea Breeze
-(5 rows)
+(6 rows)
 
-
-=========================================
-QUERY B: The name of all boats that are not used in any trip
-=========================================
-
-      name       
------------------
+      name
+----------------
  Bella Vista
  British Sailor
  Copacabana
- Costa Brava
  Freedom Wave
-(5 rows)
+ No Harbor -- Boat added to ilustrate some IC violation
+ Too Long -- Boat added to ilustrate some IC violation
+(6 rows)
 
-
-=========================================
-QUERY C: The name of all boats registered in 'PRT' (ISO code) 
-for which at least one responsible for a reservation has a 
-surname that ends with 'Santos'
-=========================================
-
-      name       
------------------
+      name
+----------------
  Atlantic Dream
  Ocean Explorer
  Sea Breeze
 (3 rows)
 
-
-=========================================
-QUERY D: The full name of all skippers without any certificate 
-corresponding to the class of the trip's boat
-=========================================
-
-    full_name    
+    full_name
 -----------------
- Ana Costa
- Beatriz Santos
-(2 rows)
+ Isabel Oliveira -- If all IC were implemented this query should't return anything
+(1 row)

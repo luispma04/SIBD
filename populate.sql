@@ -288,6 +288,7 @@ INSERT INTO Certification (sailor_id, issue_date, expiry_date) VALUES
 (10,'2024-01-10', '2028-01-10'),
 (11,'2019-06-20', '2025-06-20'),
 (11,'2020-08-25', '2026-08-25'),
+(11, '2021-11-02', '2027-11-02'),
 (12,'2023-11-15', '2027-11-15');
 
 -- ========================================
@@ -322,6 +323,7 @@ INSERT INTO certifies_for (sailor_id, certification_issue_date, class_name) VALU
 -- Fernando (sailor 11)
 (11,'2019-06-20','Class 1'),
 (11,'2020-08-25','Class 2'),
+(11,'2021-11-02','Class 3'),
 -- Lucia (sailor 12)
 (12,'2023-11-15','Class 1');
 
@@ -433,6 +435,13 @@ INSERT INTO Trip (
 ) VALUES
 ('PRT','2019-042','2025-11-01','2025-11-05','2025-11-02','2025-11-03','INS-VIOL-011',
  38.706944,-9.135278, 37.019167,-7.930833, 1); -- skipper 1 not authorized for this reservation
+INSERT INTO navigates (
+    country_iso_code, boat_cni, reservation_start_date, reservation_end_date,
+    trip_takeoff_date, trip_arrival_date,
+    jurisdiction_name, jurisdiction_sequence_order
+) VALUES
+('PRT','2019-042','2025-11-01','2025-11-05','2025-11-02','2025-11-03','Portuguese Internal Waters',1),
+('PRT','2019-042','2025-11-01','2025-11-05','2025-11-02','2025-11-03','Portuguese Territorial Sea',2);
 -- Example that would satisfy IC-11 (authorize skipper 1):
 -- INSERT INTO authorized (country_iso_code, boat_cni, reservation_start_date, reservation_end_date, sailor_id) VALUES
 -- ('PRT','2019-042','2025-11-01','2025-11-05',1);
@@ -451,6 +460,13 @@ INSERT INTO Trip (
 ) VALUES
 ('ESP','2022-056','2025-11-10','2025-11-14','2025-11-11','2025-11-12','INS-VIOL-012',
  41.375833, 2.183056, 43.296389, 5.369722, 6); -- sailor 6 only certified for Class 1
+INSERT INTO navigates (
+    country_iso_code, boat_cni, reservation_start_date, reservation_end_date,
+    trip_takeoff_date, trip_arrival_date,
+    jurisdiction_name, jurisdiction_sequence_order
+) VALUES
+('ESP','2022-056','2025-11-10','2025-11-14','2025-11-11','2025-11-12','Spanish Internal Waters',1),
+('ESP','2022-056','2025-11-10','2025-11-14','2025-11-11','2025-11-12','Spanish Territorial Sea',2);
 -- Example that would satisfy IC-12 (give skipper 6 a valid Class 4 cert during the trip):
 -- INSERT INTO Certification (sailor_id, issue_date, expiry_date) VALUES
 -- (6, '2025-01-01', '2026-01-01');
@@ -461,6 +477,7 @@ INSERT INTO Trip (
 -- (6, '2025-01-01', 'French Internal Waters');
 
 -- IC-15: Overlapping trips within the same reservation.
+-- IC-16: Trip without navigates entry.
 INSERT INTO Reservation (country_iso_code, boat_cni, start_date, end_date, responsible_for_sailor_id) VALUES
 ('FRA', '2020-089', '2025-09-01', '2025-09-10', 9);
 INSERT INTO authorized (country_iso_code, boat_cni, reservation_start_date, reservation_end_date, sailor_id) VALUES
@@ -476,28 +493,15 @@ INSERT INTO Trip (
  43.296389, 5.369722, 43.695556, 7.282222, 9),
 ('FRA','2020-089','2025-09-01','2025-09-10','2025-09-04','2025-09-07','INS-VIOL-015B',
  43.695556, 7.282222, 43.296389, 5.369722, 9); -- overlaps with previous trip
+ -- no navigates row on purpose
 
--- IC-16: Trip without navigates entry.
-INSERT INTO Reservation (country_iso_code, boat_cni, start_date, end_date, responsible_for_sailor_id) VALUES
-('BRA', '2020-444', '2025-12-01', '2025-12-05', 11);
-INSERT INTO authorized (country_iso_code, boat_cni, reservation_start_date, reservation_end_date, sailor_id) VALUES
-('BRA','2020-444','2025-12-01','2025-12-05',11);
-INSERT INTO Trip (
-    country_iso_code, boat_cni, reservation_start_date, reservation_end_date,
-    takeoff_date, arrival_date, insurance_reference,
-    starts_at_latitude, starts_at_longitude,
-    ends_at_latitude,   ends_at_longitude,
-    skippers_id
-) VALUES
-('BRA','2020-444','2025-12-01','2025-12-05','2025-12-02','2025-12-03','INS-VIOL-016',
- -22.968333,-43.173056, -22.968333,-43.173056, 11); -- no navigates row on purpose
 -- Example that would satisfy IC-16 if uncommented:
 -- INSERT INTO navigates (
 --     country_iso_code, boat_cni, reservation_start_date, reservation_end_date,
 --     trip_takeoff_date, trip_arrival_date,
 --     jurisdiction_name, jurisdiction_sequence_order
 -- ) VALUES
--- ('BRA','2020-444','2025-12-01','2025-12-05','2025-12-02','2025-12-03','Brazilian Internal Waters',1);
+-- ('FRA','2020-089','2025-09-01','2025-09-02','2025-09-02','2025-09-05','French Internal Waters',1);
 
 -- IC-18: Certification missing valid_in and certifies_for associations.
 INSERT INTO Certification (sailor_id, issue_date, expiry_date) VALUES
