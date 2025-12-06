@@ -84,6 +84,7 @@ CREATE TABLE Location (
 
 -- ========================================
 -- HAS_LOCATION (Country 1 : M Location)
+-- We assumed that a location could exist without being associated with any country.
 -- Each location is administered by at most one country.
 -- M:1 association implemented using a separate table:
 --   - combination of latitude and longitude is the PRIMARY KEY, so each location
@@ -134,6 +135,7 @@ CREATE TABLE Boat (
 
 -- ========================================
 -- SAILOR
+-- Because all the atributes are updatable we added a artificial key 'id' as primary key for stability
 
 -- IC-7: No sailor can exist at the same time in the table 'junior' or in the table 'senior'
 --  Constraint enforcement requires triggers or application logic - not implemented.
@@ -166,7 +168,7 @@ CREATE TABLE Junior (
 
 -- ========================================
 -- RESERVATION
-
+-- We assumed only 1 responsible per reservation, thats why we used a FK instead of a M:N table
 -- IC-8: end_date must be ≥ start_date. 
 --  CHECK applied.
 -- IC-9: For the same boat, reservations cannot overlap in time. 
@@ -179,7 +181,7 @@ CREATE TABLE Reservation (
     boat_cni VARCHAR(50),
     start_date DATE,
     end_date DATE,
-    responsible_for_sailor_id INTEGER NOT NULL,
+    responsible_for_sailor_id INTEGER NOT NULL, 
     PRIMARY KEY(country_iso_code, boat_cni, start_date, end_date),
     FOREIGN KEY (country_iso_code, boat_cni) REFERENCES Boat(country_iso_code, cni),
     FOREIGN KEY (responsible_for_sailor_id) REFERENCES Senior(senior_id),
@@ -208,6 +210,7 @@ CREATE TABLE authorized (
 
 -- ========================================
 -- TRIP
+-- We assumed that a trip is always associated with a single reservation.
 
 -- IC-11: Skipper must be among Reservation's authorized sailors.
 --  Constraint enforcement requires triggers or application logic - not implemented.
@@ -267,6 +270,9 @@ CREATE TABLE navigates (
     jurisdiction_name VARCHAR(200),
     jurisdiction_sequence_order INTEGER NOT NULL,
     PRIMARY KEY (country_iso_code, boat_cni, reservation_start_date, reservation_end_date, trip_takeoff_date, trip_arrival_date, jurisdiction_sequence_order),
+    -- We assumed that in one trip the boat could pass through the same jurisdiction multiple times
+    -- so we used sequence_order instead of jurisdiction_name as part of the PK
+    -- to allow multiple entries for the same jurisdiction in different positions
     FOREIGN KEY (country_iso_code, boat_cni, reservation_start_date, reservation_end_date, trip_takeoff_date, trip_arrival_date) REFERENCES Trip(country_iso_code, boat_cni, reservation_start_date, reservation_end_date, takeoff_date, arrival_date),
     FOREIGN KEY (jurisdiction_name) REFERENCES Jurisdiction(name),
     CHECK (jurisdiction_sequence_order > 0)
