@@ -18,29 +18,29 @@ SELECT
 
 FROM trip t
 
--- Local de origem
+-- Origin location
 JOIN location l_orig
   ON t.from_latitude  = l_orig.latitude
  AND t.from_longitude = l_orig.longitude
 
--- Local de destino
+-- Destination location
 JOIN location l_dest
   ON t.to_latitude  = l_dest.latitude
  AND t.to_longitude = l_dest.longitude
 
--- País da origem
+-- Origin country
 JOIN country c_orig
   ON l_orig.country_name = c_orig.name
 
--- País do destino
+-- Destination country
 JOIN country c_dest
   ON l_dest.country_name = c_dest.name
 
--- Barco
+-- Boat
 JOIN boat b
   ON t.boat_country = b.country
- AND t.cni          = b.cni
+ AND t.cni = b.cni
 
--- País do barco
+-- Boat's country
 JOIN country c_boat
   ON b.country = c_boat.name;
