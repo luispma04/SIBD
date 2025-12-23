@@ -164,7 +164,3 @@ CREATE TABLE trip(
 
     -- (IC-3) The skipper must be an authorized sailor of the corresponding reservation.
 );
-
-
-
-

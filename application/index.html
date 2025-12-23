@@ -1,36 +1,71 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Boating Management System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="static/style.css">
 </head>
 <body>
-    <h1>Boating Management System</h1>
-    
-    <h2>Sailors</h2>
-    <ul>
-        <li><a href="cgi-bin/sailors.py?action=list">List Sailors</a></li>
-        <li><a href="templates/sailors_form.html">Create Sailor</a></li>
-        <li><a href="cgi-bin/sailors.py?action=delete">Delete Sailor</a></li>
-    </ul>
-    
-    <h2>Reservations</h2>
-    <ul>
-        <li><a href="cgi-bin/reservations.py?action=list">List Reservations</a></li>
-        <li><a href="templates/reservations_form.html">Create Reservation</a></li>
-        <li><a href="cgi-bin/reservations.py?action=delete">Delete Reservation</a></li>
-    </ul>
-    
-    <h2>Trips</h2>
-    <ul>
-        <li><a href="cgi-bin/trips.py?action=list">List Trips</a></li>
-        <li><a href="templates/trips_form.html">Create Trip</a></li>
-        <li><a href="cgi-bin/trips.py?action=delete">Delete Trip</a></li>
-    </ul>
-    
-    <h2>Authorization</h2>
-    <ul>
-        <li><a href="templates/authorize_form.html">Authorize Sailor</a></li>
-        <li><a href="cgi-bin/authorize.py?action=deauthorize">De-authorize Sailor</a></li>
-    </ul>
+    <header class="topbar">
+        <div class="brand">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <rect width="24" height="24" rx="6" fill="white" opacity="0.08"/>
+                <path d="M3 12c3-2 6-3 9-3s6 1 9 3v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-6z" fill="white" opacity="0.2"/>
+                <path d="M5 12c3.5-2.2 7-2.8 11 0" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <h1>Boating Management System</h1>
+        </div>
+        <nav class="nav" aria-label="Main navigation">
+            <a href="cgi-bin/sailors.cgi">Sailors</a>
+            <a href="cgi-bin/reservations.py">Reservations</a>
+            <a href="cgi-bin/trips.py">Trips</a>
+            <a href="cgi-bin/authorize.py">Authorizations</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section class="grid">
+            <div class="card">
+                <h2>Sailors</h2>
+                <ul>
+                    <li><a href="cgi-bin/sailors.cgi">List Sailors</a></li>
+                    <li><a href="cgi-bin/sailors.cgi?add=1">Create Sailor</a></li>
+                    <li><a href="cgi-bin/sailors.cgi">Delete Sailor</a></li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h2>Reservations</h2>
+                <ul>
+                    <li><a href="cgi-bin/reservations.py">List Reservations</a></li>
+                    <li><a href="cgi-bin/reservations.py?add=1">Create Reservation</a></li>
+                    <li><a href="cgi-bin/reservations.py">Delete Reservation</a></li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h2>Trips</h2>
+                <ul>
+                    <li><a href="cgi-bin/trips.py">List Trips</a></li>
+                    <li><a href="cgi-bin/trips.py?add=1">Create Trip</a></li>
+                    <li><a href="cgi-bin/trips.py">Delete Trip</a></li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h2>Authorization</h2>
+                <ul>
+                    <li><a href="cgi-bin/authorize.py">Authorize Sailor</a></li>
+                    <li><a href="cgi-bin/authorize.py?deauthorize=1">De-authorize Sailor</a></li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div>Local preview — restart your local server after changes. CGI scripts must be implemented for dynamic features.</div>
+    </footer>
 </body>
 </html>

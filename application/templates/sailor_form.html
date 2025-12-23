@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>$title</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="static/style.css" />
+  <style>
+    body { font-family: 'Poppins', Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; }
+    .form-row{display:flex;gap:12px;flex-wrap:wrap}
+    .form-field{flex:1;min-width:180px;box-sizing:border-box}
+    label{display:block;margin-bottom:6px;font-weight:600}
+    input[type="text"], input[type="email"], select{width:100%;padding:10px;border-radius:8px;border:1px solid #e6eefc;box-sizing:border-box}
+    .actions{margin-top:12px;display:flex;gap:8px}
+
+    /* Stack form fields and buttons on narrow screens to avoid overlap */
+    @media (max-width:800px){
+      .form-row{flex-direction:column}
+      .form-field{min-width:0}
+      .actions{flex-direction:column}
+      .actions > div{width:100%}
+      .actions .btn, .actions .btn.ghost{width:100%}
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><h1 style="color:white">Boating Management System</h1></div>
+    <nav class="nav">
+      <a class="btn ghost" href="/cgi-bin/sailors.cgi" style="color:white">Sailors</a>
+      <a class="btn ghost" href="/cgi-bin/reservations.py" style="color:white">Reservations</a>
+      <a class="btn ghost" href="/cgi-bin/trips.py" style="color:white">Trips</a>
+      <a class="btn ghost" href="/cgi-bin/authorize.py" style="color:white">Authorizations</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <div class="card">
+      <h2>$title</h2>
+      $message
+
+      <form action="sailors.cgi" method="post">
+        <input type="hidden" name="action" value="add" />
+        <div class="form-row">
+          <div class="form-field">
+            <label for="email">Email</label>
+            <input id="email" type="email" name="email" required />
+          </div>
+          <div class="form-field">
+            <label for="firstname">Firstname</label>
+            <input id="firstname" type="text" name="firstname" />
+          </div>
+          <div class="form-field">
+            <label for="surname">Surname</label>
+            <input id="surname" type="text" name="surname" />
+          </div>
+        </div>
+        <div class="form-row" style="margin-top:10px">
+          <div class="form-field">
+            <label for="type">Type</label>
+            <select id="type" name="type">
+              <option value="junior">junior</option>
+              <option value="senior">senior</option>
+            </select>
+          </div>
+        </div>
+        <div class="actions">
+          <div style="flex:1;min-width:0">
+            <button class="btn" type="submit" style="width:100%;height:40px;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(90deg, #0b69ff 0%, #2f80ff 100%); color:white;font-size:14px;font-weight:600;padding:0;border-radius:8px;box-sizing:border-box">Add sailor</button>
+          </div>
+          <div style="flex:1;min-width:0">
+            <a class="btn ghost" href="sailors.cgi" style="display:inline-flex;text-align:center;width:100%;height:40px;align-items:center;justify-content:center;font-size:14px;font-weight:600;padding:0;border-radius:8px;box-sizing:border-box">Cancel</a>
+          </div>
+        </div>
+      </form>
+    </div>
+  </main>
+</body>
+</html>

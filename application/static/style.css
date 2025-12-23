@@ -1,0 +1,40 @@
+.root{
+    --bg:#f6fbff;
+    --card:#ffffff;
+    --muted:#6b7280;
+    --accent:#0b69ff;
+    --danger:#e11d48;
+    --nav:#0f1724;
+    --radius:10px;
+}
+html,body{height:100%;margin:0;font-family:'Poppins', Inter, system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial; background:var(--bg); color:#0f1724}
+.topbar{background:linear-gradient(90deg, #0b69ff 0%, #2f80ff 100%); color:white; padding:14px 20px; display:flex; align-items:center; justify-content:space-between}
+.brand{display:flex;gap:12px;align-items:center}
+.brand h1{font-size:18px;margin:0;font-weight:700}
+.nav{display:flex;gap:12px}
+.nav a{color:rgba(255,255,255,0.92); text-decoration:none; padding:8px 12px; border-radius:8px; font-weight:600}
+.topbar .btn.ghost{color:rgba(255,255,255,0.92); border-color: rgba(255,255,255,0.12)}
+.topbar .brand h1{color:white;margin:0;font-weight:700}
+.nav a:hover{background:rgba(255,255,255,0.08)}
+.container{max-width:1100px;margin:28px auto;padding:0 20px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px}
+.card{background:var(--card);border-radius:var(--radius);padding:18px;box-shadow:0 6px 20px rgba(12,15,25,0.06)}
+.card h2{margin:0 0 8px 0;font-size:18px}
+.card ul{margin:8px 0 0 0;padding:0 0 0 18px;color:var(--muted)}
+.card a{color:var(--accent);text-decoration:none}
+.footer{max-width:1100px;margin:24px auto;color:var(--muted);font-size:13px;padding:0 20px}
+@media (max-width:640px){.nav{display:none}}
+
+/* Tables and buttons */
+.table{width:100%;border-collapse:collapse;margin-top:12px}
+.table th,.table td{padding:10px 12px;border-bottom:1px solid #eef2f7;text-align:left;font-size:14px}
+.table th{background:linear-gradient(90deg,#fafcff,#f3f8ff);font-weight:600;color:#0b2a66}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:8px 12px;border-radius:8px;background:var(--accent);color:white;text-decoration:none;font-weight:600;border:none}
+.btn:hover{filter:brightness(0.98);transform:translateY(-1px)}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid rgba(11,105,255,0.12)}
+.btn.danger{background:var(--danger);color:white;border:1px solid rgba(225,29,72,0.12)}
+.btn.danger:hover{filter:brightness(0.95);transform:translateY(-1px)}
+.muted{color:var(--muted);font-size:13px}
+.table tr:hover{background:#f4f7ff}
+.actions{display:flex;gap:8px;align-items:center}
+.actions .btn{padding:8px 12px}

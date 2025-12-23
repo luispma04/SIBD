@@ -1,9 +1,35 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Reservations List</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Reservations — Boating Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <h1>Reservations List</h1>
+    <header class="topbar">
+        <div class="brand"><h1>Boating Management System</h1></div>
+        <nav class="nav">
+            <a href="/index.html">Home</a>
+            <a href="/cgi-bin/sailors.py?action=list">Sailors</a>
+            <a href="/cgi-bin/reservations.py?action=list">Reservations</a>
+            <a href="/cgi-bin/trips.py?action=list">Trips</a>
+        </nav>
+    </header>
+    <main class="container">
+        <div class="card">
+            <h2>Reservations</h2>
+            <div class="muted">List of reservations will appear here.</div>
+            <table class="table">
+                <thead>
+                    <tr><th>Start</th><th>End</th><th>Boat</th><th>Responsible</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td colspan="4" class="muted">No data (CGI scripts provide dynamic content)</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
 </body>
 </html>
