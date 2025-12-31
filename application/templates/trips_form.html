@@ -1,9 +1,109 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Trips Form</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>$title</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="static/style.css" />
+  <style>
+    body { font-family: 'Poppins', Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; }
+    .form-row{display:flex;gap:12px;flex-wrap:wrap}
+    .form-field{flex:1;min-width:180px;box-sizing:border-box}
+    label{display:block;margin-bottom:6px;font-weight:600}
+    input[type="text"], input[type="date"], select{width:100%;padding:10px;border-radius:8px;border:1px solid #e6eefc;box-sizing:border-box}
+    .actions{margin-top:12px;display:flex;gap:8px}
+    .error { color: #dc2626; background: #fee2e2; padding: 10px; border-radius: 6px; margin: 10px 0; }
+
+    @media (max-width:800px){
+      .form-row{flex-direction:column}
+      .form-field{min-width:0}
+      .actions{flex-direction:column}
+      .actions > div{width:100%}
+      .actions .btn, .actions .btn.ghost{width:100%}
+    }
+  </style>
 </head>
 <body>
-    <h1>Trips Form</h1>
+  <header class="topbar">
+    <div class="brand"><h1 style="color:white">Boating Management System</h1></div>
+    <nav class="nav">
+      <a class="btn ghost" href="sailors.cgi" style="color:white">Sailors</a>
+      <a class="btn ghost" href="reservations.py" style="color:white">Reservations</a>
+      <a class="btn ghost" href="trips.cgi" style="color:white">Trips</a>
+      <a class="btn ghost" href="authorize.py" style="color:white">Authorizations</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <div class="card">
+      <h2>$title</h2>
+      $message
+
+      <form action="trips.cgi" method="post">
+        <div class="form-row">
+          <div class="form-field">
+            <label for="takeoff">Takeoff Date</label>
+            <input id="takeoff" type="date" name="takeoff" required />
+          </div>
+          <div class="form-field">
+            <label for="arrival">Arrival Date</label>
+            <input id="arrival" type="date" name="arrival" required />
+          </div>
+        </div>
+
+        <div class="form-row" style="margin-top:10px">
+          <div class="form-field">
+            <label for="from_location">From Location</label>
+            <select id="from_location" name="from_location" required>
+              <option value="">-- Select Origin --</option>
+              $locations_options
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="to_location">To Location</label>
+            <select id="to_location" name="to_location" required>
+              <option value="">-- Select Destination --</option>
+              $locations_options
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row" style="margin-top:10px">
+          <div class="form-field">
+            <label for="skipper">Skipper</label>
+            <select id="skipper" name="skipper" required>
+              <option value="">-- Select Skipper --</option>
+              $skippers_options
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="reservation">Reservation</label>
+            <select id="reservation" name="reservation" required>
+              <option value="">-- Select Reservation --</option>
+              $reservations_options
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row" style="margin-top:10px">
+          <div class="form-field">
+            <label for="insurance">Insurance</label>
+            <input id="insurance" type="text" name="insurance" required maxlength="50" placeholder="e.g., CompanyX Policy #12345" />
+          </div>
+        </div>
+
+        <div class="actions">
+          <div style="flex:1;min-width:0">
+            <button class="btn" type="submit" style="width:100%;height:40px;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(90deg, #0b69ff 0%, #2f80ff 100%); color:white;font-size:14px;font-weight:600;padding:0;border-radius:8px;box-sizing:border-box">Add trip</button>
+          </div>
+          <div style="flex:1;min-width:0">
+            <a class="btn ghost" href="trips.cgi" style="display:inline-flex;text-align:center;width:100%;height:40px;align-items:center;justify-content:center;font-size:14px;font-weight:600;padding:0;border-radius:8px;box-sizing:border-box">Cancel</a>
+          </div>
+        </div>
+      </form>
+    </div>
+  </main>
 </body>
 </html>
